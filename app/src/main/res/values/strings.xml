@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Project Flow</string>
     <string name="my_projects">Projects in Flow</string>
-    <string name="no_projects">There is nothing here... Want to create a new project?</string>
+    <string name="no_projects">There is nothing here… Want to create a new project?</string>
+    <string name="documentation">Documentation</string>
+    <string name="wireframes">Wireframes</string>
+    <string name="block_schemes">Block Schemes</string>
+    <string name="structure">Structure</string>
 </resources>
