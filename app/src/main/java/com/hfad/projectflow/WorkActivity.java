@@ -24,7 +24,7 @@ public class WorkActivity extends AppCompatActivity {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(v.getContext(), "Opening documentation", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Opening documentation", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(WorkActivity.this, DocumentationActivity.class);
                 //Toast.makeText(v.getContext(), "created", Toast.LENGTH_SHORT).show();

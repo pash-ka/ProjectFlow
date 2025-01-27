@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Project Flow</string>
     <string name="my_projects">Projects in Flow</string>
-    <string name="no_projects">There is nothing here… Want to create a new project?</string>
+    <string name="no_projects">There is nothing here… Why not create a new one?</string>
+    <string name="new_project">New project</string>
+    <string name="create_order_title">Create Order</string>
+    <string name="value_hint">Enter value</string>
     <string name="documentation">Documentation</string>
     <string name="wireframes">Wireframes</string>
     <string name="block_schemes">Block Schemes</string>
