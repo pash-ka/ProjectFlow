@@ -19,6 +19,15 @@ public interface ProjectDao {
     @Query("SELECT * FROM projects WHERE owner_id = :userId")
     List<Project> getProjectsForUser(int userId);
 
+    @Query("SELECT * FROM projects WHERE id = :projectId")
+    Project getProjectById(long projectId);
+
+    @Query("SELECT id FROM projects WHERE name = :projectName")
+    long getProjectIdByName(String projectName);
+
+    /*@Query("SELECT description FROM projects WHERE id = :projectId")
+    String getDescriptionById(long projectId);*/
+
     @Query("DELETE FROM projects WHERE id = :projectId")
     void deleteProjectById(long projectId);
 

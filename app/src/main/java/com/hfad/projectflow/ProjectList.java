@@ -35,20 +35,19 @@ public class ProjectList extends ListFragment{
     private Listener listener;
     private List<String> names = new ArrayList<>();
     private List<Project> projectList;
-    private ArrayAdapter<String> arrayAdapter;
+    private CustomArrayAdapter arrayAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        /*String[] names = new String[2];
-        names[0] = "Project1";
-        names[1] = "Project2";
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-                inflater.getContext(),
-                android.R.layout.simple_list_item_1,
-                names);
-        setListAdapter(arrayAdapter);*/
+        // Inflate the layout for this fragment
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
 
         AppDatabase db = DatabaseSingleton.getInstance(requireContext());
         ProjectDao projectDao = db.projectDao();
@@ -57,6 +56,7 @@ public class ProjectList extends ListFragment{
             public void run() {
 
                 projectList = projectDao.getAllProjects();
+                if (!names.isEmpty()) names.clear();
                 for (Project p: projectList){
                     names.add(p.name);
                 }
@@ -64,19 +64,13 @@ public class ProjectList extends ListFragment{
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        arrayAdapter = new ArrayAdapter<>(
-                                getActivity().getLayoutInflater().getContext(),
-                                android.R.layout.simple_list_item_1,
-                                names);
-
+                        arrayAdapter = new CustomArrayAdapter(getActivity(), names);
                         setListAdapter(arrayAdapter);
                     }
                 });
             }
         });
 
-        // Inflate the layout for this fragment
-        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
@@ -88,9 +82,21 @@ public class ProjectList extends ListFragment{
 
     @Override
     public void onListItemClick(ListView listView, View itemView, int position, long id){
-        if (listener != null){
-            listener.itemClicked(id);
-        }
+
+        String projectName = (String) getListAdapter().getItem(position);
+        AppDatabase db = DatabaseSingleton.getInstance(requireContext());
+        ProjectDao projectDao = db.projectDao();
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                long projectId = projectDao.getProjectIdByName(projectName);
+                if (listener != null){
+                    listener.itemClicked(projectId);
+                }
+            }
+        });
+
+
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -113,10 +119,8 @@ public class ProjectList extends ListFragment{
                                         AppDatabase db = DatabaseSingleton.getInstance(getActivity().getApplicationContext());
                                         ProjectDao projectDao = db.projectDao();
                                         projectDao.deleteProject(project);
-
                                     }
                                 });
-
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)

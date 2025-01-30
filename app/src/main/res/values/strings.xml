@@ -3,7 +3,7 @@
     <string name="my_projects">Projects in Flow</string>
     <string name="no_projects">There is nothing here… Why not create a new one?</string>
     <string name="new_project">New project</string>
-    <string name="create_order_title">Create Order</string>
+    <string name="create_project">Create Project</string>
     <string name="value_hint">Enter value</string>
     <string name="documentation">Documentation</string>
     <string name="wireframes">Wireframes</string>
