@@ -18,7 +18,7 @@
         android:layout_columnWeight="1"
         android:layout_rowWeight="1"
         android:text="@string/documentation"
-        android:textSize="20sp"
+        android:textSize="35sp"
         android:gravity="center"
         android:layout_gravity="fill"
         android:layout_margin="8dp"
@@ -34,12 +34,13 @@
         android:gravity="center"
         android:layout_gravity="fill"
         android:text="@string/wireframes"
-        android:textSize="20sp"
+        android:textSize="35sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />
 
     <TextView
+        android:id="@+id/block_schemes"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_columnWeight="1"
@@ -47,7 +48,7 @@
         android:gravity="center"
         android:layout_gravity="fill"
         android:text="@string/block_schemes"
-        android:textSize="20sp"
+        android:textSize="35sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />
@@ -60,7 +61,7 @@
         android:gravity="center"
         android:layout_gravity="fill"
         android:text="@string/structure"
-        android:textSize="20sp"
+        android:textSize="35sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />

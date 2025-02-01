@@ -13,6 +13,9 @@
         android:theme="@style/Theme.ProjectFlow"
         tools:targetApi="31">
         <activity
+            android:name=".BlockSchemesActivity"
+            android:exported="false" />
+        <activity
             android:name=".CreateProjectActivity"
             android:exported="false" />
         <activity

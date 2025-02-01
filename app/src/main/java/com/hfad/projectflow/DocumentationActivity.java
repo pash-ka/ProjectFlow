@@ -19,23 +19,25 @@ import java.util.concurrent.Executors;
 public class DocumentationActivity extends AppCompatActivity {
 
     public static final String EXTRA_PROJECT_ID = "id";
-    public static final String CURRENT_USER_ID = "userId";
+    public static final String EXTRA_CURRENT_USER_ID = "userId";
+
+    AppDatabase db = DatabaseSingleton.getInstance(getBaseContext());
+    ProjectDao projectDao = db.projectDao();
+    UserDao userDao = db.userDao();
+    int projectId;
+    int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_documentation);
 
-        EditText descriptionView = findViewById(R.id.doc_text);
-        int projectId = (int) getIntent().getExtras().get(EXTRA_PROJECT_ID);
-        int currentUserId = (int) getIntent().getExtras().get(CURRENT_USER_ID);
+        projectId = (int) getIntent().getExtras().get(EXTRA_PROJECT_ID);
+        currentUserId = (int) getIntent().getExtras().get(EXTRA_CURRENT_USER_ID);
 
+        EditText descriptionView = findViewById(R.id.doc_text);
         TextView userNameTextView = findViewById(R.id.userName);
         TextView projectNameTextView = findViewById(R.id.projectName);
-
-        AppDatabase db = DatabaseSingleton.getInstance(getBaseContext());
-        ProjectDao projectDao = db.projectDao();
-        UserDao userDao = db.userDao();
 
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
@@ -53,8 +55,18 @@ public class DocumentationActivity extends AppCompatActivity {
                 });
             }
         });
+    }
 
-        /*AppDatabase db = DatabaseSingleton.getInstance(getBaseContext());
-        view.setText(db.projectDao().getAllProjects().get(projectId).description);*/
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                EditText docText = findViewById(R.id.doc_text);
+                projectDao.updateProjectDescription(projectId, docText.getText().toString());
+            }
+        });
     }
 }

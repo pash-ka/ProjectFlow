@@ -3,7 +3,6 @@ package com.hfad.projectflow;
 import android.content.Intent;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -17,8 +16,6 @@ import com.hfad.projectflow.database.ProjectDao;
 import com.hfad.projectflow.database.User;
 import com.hfad.projectflow.database.UserDao;
 
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -36,10 +33,6 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
         AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
         ProjectDao projectDao = db.projectDao();
 
-        /*  try to get user from db
-            if there is one -> egt his id to use it in intent
-            if there is no -> create one
-        */
         UserDao userDao = db.userDao();
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
@@ -56,27 +49,6 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
                 }
             }
         });
-
-        /*db = DatabaseSingleton.getInstance(getApplicationContext());
-        Log.d("DatabaseCheck", "Database created successfully");
-        UserDao userDao = db.userDao();
-        ProjectDao projectDao = db.projectDao();
-
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                User me = new User();
-                me.name = "Pasha";
-                me.email = "pasha@gmail.com";
-                userDao.insert(me);
-                long userId = userDao.insert(me);
-                Project myPr = new Project();
-                myPr.name = "Uni";
-                myPr.description = "Standard uni project";
-                myPr.ownerId = (int) userId;
-                projectDao.insert(myPr);
-            }
-        });*/
 
     }
 
@@ -98,8 +70,7 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
                     });
                 }
                 else {
-                    /*System.out.println(projectList.get(0).name);
-                    System.out.println(projectList.get(0).id);*/
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -139,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
         Intent intent = new Intent(this, WorkActivity.class);
         // SEND WRONG ID WITH THE INTENT. NEED TO GET THE ID FROM DB
         intent.putExtra(WorkActivity.EXTRA_PROJECT_ID, (int) id);
-        intent.putExtra(WorkActivity.CURRENT_USER_ID, (int) userId);
+        intent.putExtra(WorkActivity.EXTRA_CURRENT_USER_ID, (int) userId);
         System.out.println(userId);
         startActivity(intent);
     }
