@@ -6,7 +6,7 @@
     <string name="create_project">Create Project</string>
     <string name="value_hint">Enter value</string>
     <string name="documentation">Documentation</string>
-    <string name="wireframes">Wireframes</string>
-    <string name="block_schemes">Block Schemes</string>
-    <string name="structure">Structure</string>
+    <string name="tasks">Tasks</string>
+    <string name="whiteboard">Whiteboard</string>
+    <string name="dashboard">Dashboard</string>
 </resources>

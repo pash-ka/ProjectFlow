@@ -108,7 +108,6 @@ public class DrawShapeView extends View {
         }
         return true;
 
-
     }
 
     public static boolean isEven(int number) {

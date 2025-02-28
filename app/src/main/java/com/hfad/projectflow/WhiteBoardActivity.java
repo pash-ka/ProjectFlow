@@ -1,13 +1,30 @@
 package com.hfad.projectflow;
 
+/*TODO
+* maybe having tabs for different sketches,
+* with an option of either staying on the same tab
+* or creating another one for a new sketch
+*/
+
+/*TODO
+* pencils/brushes
+* shapes
+* grid on/off
+* place it all somewhere nice, menu
+* infinite canvas
+*
+* */
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class BlockSchemesActivity extends AppCompatActivity {
+import java.util.Objects;
+
+public class WhiteBoardActivity extends AppCompatActivity {
 
     public static final String EXTRA_PROJECT_ID = "id";
     public static final String EXTRA_CURRENT_USER_ID = "userId";
@@ -17,6 +34,9 @@ public class BlockSchemesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_block_schemes);
+
+        ActionBar actionBar = getSupportActionBar();
+        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
 
         drawShapeView = findViewById(R.id.draw_shape_view);
 

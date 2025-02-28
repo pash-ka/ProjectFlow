@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.hfad.projectflow.database.AppDatabase;
 import com.hfad.projectflow.database.DatabaseSingleton;
@@ -19,6 +20,21 @@ import com.hfad.projectflow.database.UserDao;
 import java.util.List;
 import java.util.concurrent.Executors;
 
+
+/* 4 work parts:
+    Documentation ? Project Details
+    BlockSchemes ? WhiteBoard
+    To do list ? task management with scheduling
+    Dashboard / Overview
+*/
+/*
+Update AndroidManifest.xml to specify that
+MainActivity is the parent of SomeOtherActivity.
+This means that when the user clicks on the Up button in
+SomeOtherActivity’s app bar, MainActivity will be
+displayed
+*/
+
 public class MainActivity extends AppCompatActivity implements ProjectList.Listener{
 
     private AppDatabase db;
@@ -29,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
         ProjectDao projectDao = db.projectDao();
@@ -108,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
     @Override
     public void itemClicked(long id) {
         Intent intent = new Intent(this, WorkActivity.class);
-        // SEND WRONG ID WITH THE INTENT. NEED TO GET THE ID FROM DB
+
         intent.putExtra(WorkActivity.EXTRA_PROJECT_ID, (int) id);
         intent.putExtra(WorkActivity.EXTRA_CURRENT_USER_ID, (int) userId);
         System.out.println(userId);
