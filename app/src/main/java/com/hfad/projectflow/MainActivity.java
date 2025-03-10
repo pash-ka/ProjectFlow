@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.hfad.projectflow.database.AppDatabase;
 import com.hfad.projectflow.database.DatabaseSingleton;
@@ -46,7 +48,10 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        Fragment plFragment = new ProjectList();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.content_frame, plFragment);
+        ft.commit();
 
         AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
         ProjectDao projectDao = db.projectDao();

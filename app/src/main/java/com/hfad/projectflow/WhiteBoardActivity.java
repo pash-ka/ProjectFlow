@@ -15,9 +15,13 @@ package com.hfad.projectflow;
 *
 * */
 
+
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +37,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_block_schemes);
+        setContentView(R.layout.activity_whiteboard);
 
         ActionBar actionBar = getSupportActionBar();
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
@@ -44,7 +48,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
         rectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                drawShapeView.setShapeType("RECTANGLE");
+                drawShapeView.setShapeType(ShapeType.RECTANGLE);
             }
         });
 
@@ -52,7 +56,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
         circleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                drawShapeView.setShapeType("CIRCLE");
+                drawShapeView.setShapeType(ShapeType.CIRCLE);
             }
         });
 
@@ -60,7 +64,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
         lineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                drawShapeView.setShapeType("LINE");
+                drawShapeView.setShapeType(ShapeType.LINE);
             }
         });
 
@@ -68,7 +72,25 @@ public class WhiteBoardActivity extends AppCompatActivity {
         diamondButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                drawShapeView.setShapeType("DIAMOND");
+                drawShapeView.setShapeType(ShapeType.DIAMOND);
+            }
+        });
+
+        ToggleButton gridTB = findViewById(R.id.grid_toggle);
+        gridTB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //if (isChecked) drawShapeView.clearCanvas();
+                drawShapeView.grid = !drawShapeView.grid;
+                drawShapeView.invalidate();
+            }
+        });
+
+        ToggleButton handTB = findViewById(R.id.hand_toggle);
+        handTB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                drawShapeView.hand = !drawShapeView.hand;
             }
         });
     }

@@ -75,7 +75,6 @@ public class ProjectList extends ListFragment{
     public void onAttach(Context context){
         super.onAttach(context);
         this.listener = (Listener) context;
-
     }
 
     @Override
@@ -93,7 +92,6 @@ public class ProjectList extends ListFragment{
                 }
             }
         });
-
 
     }
 

@@ -9,4 +9,8 @@
     <string name="tasks">Tasks</string>
     <string name="whiteboard">Whiteboard</string>
     <string name="dashboard">Dashboard</string>
+    <string name="grid_on">Grid</string>
+    <string name="grid_off">Plain</string>
+    <string name="scaling_mode">Hand</string>
+    <string name="drawing_mode">Draw</string>
 </resources>
