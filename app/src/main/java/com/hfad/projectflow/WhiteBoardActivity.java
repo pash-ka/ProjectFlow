@@ -9,11 +9,10 @@ package com.hfad.projectflow;
 /*TODO
 * pencils/brushes
 * shapes
-* grid on/off
+* grid on/off +
 * place it all somewhere nice, menu
-* infinite canvas
-*
-* */
+* infinite canvas +
+*/
 
 
 
@@ -82,6 +81,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 //if (isChecked) drawShapeView.clearCanvas();
                 drawShapeView.grid = !drawShapeView.grid;
+                drawShapeView.drawOnGrid = !drawShapeView.drawOnGrid;
                 drawShapeView.invalidate();
             }
         });

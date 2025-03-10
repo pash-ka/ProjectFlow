@@ -14,11 +14,9 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DrawShapeView extends View {
@@ -26,25 +24,24 @@ public class DrawShapeView extends View {
     private final Paint paint;
     private final Paint gridPaint;
 
-    private Path path;
-    private Path previewPath;
+    private final Path path;
+    private final Path previewPath;
 
-    private Matrix matrix;
-    private Matrix inverseMatrix;
+    private final Matrix matrix;
+    private final Matrix inverseMatrix;
     private float[] matrixValues;
 
-    private int startX, startY, endX, endY, x, y;
+    private float startX, startY, endX, endY, currentX, currentY;
     private ShapeType shapeType;
     private List<Shape> shapes = new ArrayList<>();
 
-    private ScaleGestureDetector scaleGestureDetector;
-    private GestureDetector gestureDetector;
+    private final ScaleGestureDetector scaleGestureDetector;
+    private final GestureDetector gestureDetector;
 
     private final int gridSize = 50; // Grid size in pixels
     public boolean grid = true;
-    public boolean drawOnGrid = false;
+    public boolean drawOnGrid = true;
     public boolean hand = false;
-    public boolean doubleTap;
 
     /*
     back to drawing in onTouchEvent
@@ -100,7 +97,7 @@ public class DrawShapeView extends View {
 
         shapeType = ShapeType.NONE;
 
-        //scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
@@ -129,41 +126,31 @@ public class DrawShapeView extends View {
     }
 
     private void drawDynamicGrid(Canvas canvas) {
-        // Get the current transformation matrix's inverse
-        Matrix inverse = new Matrix();
-        matrix.invert(inverse);
-
-        // Map the canvas visible area to the grid's coordinate system
+        // Get the visible bounds in canvas space
         Rect visibleRect = new Rect();
         canvas.getClipBounds(visibleRect);
-        float[] transformedCorners = new float[]{
-                visibleRect.left, visibleRect.top,
-                visibleRect.right, visibleRect.top,
-                visibleRect.right, visibleRect.bottom,
-                visibleRect.left, visibleRect.bottom
-        };
-        inverse.mapPoints(transformedCorners);
 
-        // Calculate visible bounds in grid space
-        float left = Math.min(transformedCorners[0], transformedCorners[2]); // Minimum x
-        float top = Math.min(transformedCorners[1], transformedCorners[5]);  // Minimum y
-        float right = Math.max(transformedCorners[4], transformedCorners[6]); // Maximum x
-        float bottom = Math.max(transformedCorners[3], transformedCorners[7]); // Maximum y
+        // Extract the bounds in transformed space
+        float visibleLeft = visibleRect.left;
+        float visibleTop = visibleRect.top;
+        float visibleRight = visibleRect.right;
+        float visibleBottom = visibleRect.bottom;
 
         // Align the grid lines to the grid spacing
-        float alignedLeft = (float) Math.floor(left / gridSize) * gridSize;
-        float alignedTop = (float) Math.floor(top / gridSize) * gridSize;
+        float alignedLeft = (float) Math.floor(visibleLeft / gridSize) * gridSize;
+        float alignedTop = (float) Math.floor(visibleTop / gridSize) * gridSize;
 
-        // Draw horizontal lines
-        for (float y = alignedTop; y <= bottom; y += gridSize) {
-            canvas.drawLine(left, y, right, y, gridPaint);
+        // Draw horizontal grid lines
+        for (float y = alignedTop; y <= visibleBottom; y += gridSize) {
+            canvas.drawLine(visibleLeft, y, visibleRight, y, gridPaint);
         }
 
-        // Draw vertical lines
-        for (float x = alignedLeft; x <= right; x += gridSize) {
-            canvas.drawLine(x, top, x, bottom, gridPaint);
+        // Draw vertical grid lines
+        for (float x = alignedLeft; x <= visibleRight; x += gridSize) {
+            canvas.drawLine(x, visibleTop, x, visibleBottom, gridPaint);
         }
     }
+
 
 
     private void drawGrid(Canvas canvas) {
@@ -221,86 +208,86 @@ public class DrawShapeView extends View {
     }
 
 
+    private float snapToGrid(float coordinate){
+        return Math.round(coordinate / gridSize) * gridSize;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event){
 
         float[] touchPoint = { event.getX(), event.getY() };
         matrix.invert(inverseMatrix);
         inverseMatrix.mapPoints(touchPoint);
-        x = (int) touchPoint[0];
-        y = (int) touchPoint[1];
+        currentX = touchPoint[0];
+        currentY = touchPoint[1];
 
-        //x = (int) event.getX();
-        //y = (int) event.getY();
+        //currentX = (int) event.getX();
+        //currentY = (int) event.getY();
 
 
-        boolean tempX = isEven(x /50);
-        boolean tempY = isEven(y /50);
+        boolean tempX = isEven(((int) currentX) /50);
+        boolean tempY = isEven(((int) currentY) /50);
 
         if (shapeType != ShapeType.NONE && !hand){
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
                     if (drawOnGrid){
-                        startX = x % 50 < 25 ? x /50 *50 : tempX ? Math.round(event.getX()/100)*100+50 : Math.round(event.getX()/100)*100;
-                        startY = y % 50 < 25 ? y /50 *50 : tempY ? Math.round(event.getY()/100)*100+50 : Math.round(event.getY()/100)*100;
+                        /*
+                        startX = Math.abs(currentX % 50) < 25 ? (float) ((int) currentX /50) *50 : tempX ? (float) (Math.round(currentX /100))*100+(currentX>0 ? 50 : -50) : (float) (Math.round(currentX /100))*100;
+                        startY = Math.abs(currentY % 50) < 25 ? (float) ((int) currentY /50) *50 : tempY ? (float) (Math.round(currentY /100))*100+(currentY>0 ? 50 : -50) : (float) (Math.round(currentY /100))*100;
+                        */
+                        startX = snapToGrid(currentX);
+                        startY = snapToGrid(currentY);
                     }
                     else {
-                        startX = x;
-                        startY = y;
-                        if (shapeType == ShapeType.LINE) {
-                            previewPath.moveTo(x, y);
-                        }
+                        startX = currentX;
+                        startY = currentY;
+                    }
+                    if (shapeType == ShapeType.LINE) {
+                        previewPath.moveTo(startX, startY);
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (drawOnGrid){
-                        endX = ((int) event.getX()) % 50 < 25 ? ((int) event.getX()) /50 *50 : tempX ? Math.round(event.getX()/100)*100+50 : Math.round(event.getX()/100)*100;;
-                        endY = ((int) event.getY()) % 50 < 25 ? ((int) event.getY()) /50 *50 : tempY ? Math.round(event.getY()/100)*100+50 : Math.round(event.getY()/100)*100;
+                        currentX = snapToGrid(currentX);
+                        currentY = snapToGrid(currentY);
                     }
-                    else {
-                        endX = (int) event.getX();
-                        endY = (int) event.getY();
-                        if (shapeType == ShapeType.LINE) {
-                            previewPath.reset();
-                            previewPath.moveTo(startX, startY);
-                            previewPath.lineTo(x, y);
-                        }
-                        else if (shapeType == ShapeType.RECTANGLE) {
-                            previewPath.reset();
-                            previewPath.addRect(startX, startY, x, y, Path.Direction.CW);
-                        } else if (shapeType == ShapeType.CIRCLE) {
-                            previewPath.reset();
-                            float radius = (float) Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
-                            previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
-                        }
+                    if (shapeType == ShapeType.LINE) {
+                        previewPath.reset();
+                        previewPath.moveTo(startX, startY);
+                        previewPath.lineTo(currentX, currentY);
+                    }
+                    else if (shapeType == ShapeType.RECTANGLE) {
+                        previewPath.reset();
+                        previewPath.addRect(startX, startY, currentX, currentY, Path.Direction.CW);
+                    } else if (shapeType == ShapeType.CIRCLE) {
+                        previewPath.reset();
+                        float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+                        previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
                     }
 
                     //invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
                     if (drawOnGrid){
-                        endX = ((int) event.getX()) % 50 < 25 ? ((int) event.getX()) /50 *50 : tempX ? Math.round(event.getX()/100)*100+50 : Math.round(event.getX()/100)*100;
-                        endY = ((int) event.getY()) % 50 < 25 ? ((int) event.getY()) /50 *50 : tempY ? Math.round(event.getY()/100)*100+50 : Math.round(event.getY()/100)*100;
+                        currentX = snapToGrid(currentX);
+                        currentY = snapToGrid(currentY);
                     }
-                    else {
-                        endX = (int) event.getX();
-                        endY = (int) event.getY();
-                        if (shapeType == ShapeType.LINE) {
-                            path.moveTo(startX, startY);
-                            path.lineTo(x, y);
 
-                        } else if (shapeType == ShapeType.RECTANGLE) {
-                            path.addRect(startX, startY, x, y, Path.Direction.CW);
-                        } else if (shapeType == ShapeType.CIRCLE) {
-                            float radius = (float) Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
-                            path.addCircle(startX, startY, radius, Path.Direction.CW);
-                        }
-                        previewPath.reset();
+                    if (shapeType == ShapeType.LINE) {
+                        path.moveTo(startX, startY);
+                        path.lineTo(currentX, currentY);
 
+                    } else if (shapeType == ShapeType.RECTANGLE) {
+                        path.addRect(startX, startY, currentX, currentY, Path.Direction.CW);
+                    } else if (shapeType == ShapeType.CIRCLE) {
+                        float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+                        path.addCircle(startX, startY, radius, Path.Direction.CW);
                     }
+                    previewPath.reset();
                     //invalidate();
-                    shapes.add(new Shape(shapeType, startX, startY, endX, endY));
+                    //shapes.add(new Shape(shapeType, startX, startY, endX, endY));
 
                     break;
             }
@@ -308,10 +295,10 @@ public class DrawShapeView extends View {
         else if (shapeType == ShapeType.NONE && !hand){
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    startDrawing(x, y);
+                    startDrawing(currentX, currentY);
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    updateDrawing(x, y);
+                    updateDrawing(currentX, currentY);
                     break;
                 case MotionEvent.ACTION_UP:
                     // Optional: handle action up if needed
@@ -319,7 +306,7 @@ public class DrawShapeView extends View {
             }
         }
         else{
-            //scaleGestureDetector.onTouchEvent(event);
+            scaleGestureDetector.onTouchEvent(event);
             gestureDetector.onTouchEvent(event);
         }
 
