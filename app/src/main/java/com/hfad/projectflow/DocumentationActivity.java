@@ -42,19 +42,16 @@ public class DocumentationActivity extends AppCompatActivity {
         currentUserId = (int) getIntent().getExtras().get(EXTRA_CURRENT_USER_ID);
 
         EditText descriptionView = findViewById(R.id.doc_text);
-        TextView userNameTextView = findViewById(R.id.userName);
         TextView projectNameTextView = findViewById(R.id.projectName);
 
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                User user = userDao.getUserById(currentUserId);
                 Project project = projectDao.getProjectById(projectId);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        userNameTextView.setText(user.name);
                         projectNameTextView.setText(project.name);
                         descriptionView.setText(project.description);
                     }

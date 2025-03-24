@@ -13,8 +13,11 @@ import java.util.List;
 
 public class CustomArrayAdapter extends ArrayAdapter<String> {
 
-    public CustomArrayAdapter(@NonNull Context context, @NonNull List<String> objects) {
+    private boolean isLargeScreen;
+
+    public CustomArrayAdapter(@NonNull Context context, @NonNull List<String> objects, boolean isLargeScreen) {
         super(context, android.R.layout.simple_list_item_1, objects);
+        this.isLargeScreen = isLargeScreen;
     }
     @NonNull
     @Override
@@ -28,7 +31,8 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
         textView.setText(text);
 
         // Set text size programmatically
-        textView.setTextSize(30);
+        if (isLargeScreen) textView.setTextSize(30);
+        else textView.setTextSize(20);
         textView.setPadding(5, 10, 5, 10);
 
         return convertView;

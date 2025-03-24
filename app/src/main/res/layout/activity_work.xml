@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnCount="2"
-    android:rowCount="2"
+    android:orientation="vertical"
     tools:context=".WorkActivity"
     android:padding="8dp"
     android:background="@color/colorPrimary"
@@ -13,57 +12,53 @@
 
     <TextView
         android:id="@+id/documentation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_columnWeight="1"
-        android:layout_rowWeight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:text="@string/documentation"
-        android:textSize="35sp"
+        android:textSize="25sp"
         android:gravity="center"
-        android:layout_gravity="fill"
+        android:layout_gravity="center"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
 
         />
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_columnWeight="1"
-        android:layout_rowWeight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:layout_gravity="fill"
+        android:layout_gravity="center"
         android:text="@string/tasks"
-        android:textSize="35sp"
+        android:textSize="25sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />
 
     <TextView
-        android:id="@+id/block_schemes"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_columnWeight="1"
-        android:layout_rowWeight="1"
+        android:id="@+id/whiteboard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:layout_gravity="fill"
+        android:layout_gravity="center"
         android:text="@string/whiteboard"
-        android:textSize="35sp"
+        android:textSize="25sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_columnWeight="1"
-        android:layout_rowWeight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:layout_gravity="fill"
+        android:layout_gravity="center"
         android:text="@string/dashboard"
-        android:textSize="35sp"
+        android:textSize="25sp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         />
 
-</GridLayout>
+</LinearLayout>

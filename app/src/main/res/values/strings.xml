@@ -13,4 +13,5 @@
     <string name="grid_off">Plain</string>
     <string name="scaling_mode">Hand</string>
     <string name="drawing_mode">Draw</string>
+    <string name="save_image">Save the image</string>
 </resources>

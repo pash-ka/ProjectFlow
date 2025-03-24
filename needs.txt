@@ -1,0 +1,10 @@
+        WhiteboardActivity
+for tabs for each drawing:
+    private class extending FragmentStateAdapter
+    TabLayout
+    TabLayoutMediator
+    ViePager2 ??
+
+variable that will hold the id of the current image in the opened tab, if this image is already in db
+if the image is new, variable is null so it should be added to db,
+otherwise need to update the drawing data value of the respectful row for this image

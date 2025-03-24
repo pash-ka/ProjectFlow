@@ -15,6 +15,7 @@
         <activity
             android:name=".WhiteBoardActivity"
             android:parentActivityName=".WorkActivity"
+
             android:exported="false" />
         <activity
             android:name=".CreateProjectActivity"
@@ -25,6 +26,7 @@
             android:exported="false" />
         <activity
             android:name=".WorkActivity"
+            android:parentActivityName=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

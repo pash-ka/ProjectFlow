@@ -40,7 +40,6 @@ public class CreateProjectActivity extends AppCompatActivity {
         InputFieldAdapter inputFieldAdapter = new InputFieldAdapter(inputFieldList);
         recyclerView.setAdapter(inputFieldAdapter);
 
-
         Button btnCreateProject = findViewById(R.id.button_create_project);
 
         btnCreateProject.setOnClickListener(new View.OnClickListener() {

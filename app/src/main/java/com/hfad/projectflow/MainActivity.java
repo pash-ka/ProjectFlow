@@ -2,6 +2,7 @@ package com.hfad.projectflow;
 
 import android.content.Intent;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.hfad.projectflow.database.AppDatabase;
 import com.hfad.projectflow.database.DatabaseSingleton;
+import com.hfad.projectflow.database.DrawingDao;
 import com.hfad.projectflow.database.Project;
 import com.hfad.projectflow.database.ProjectDao;
 import com.hfad.projectflow.database.User;
@@ -35,6 +37,7 @@ MainActivity is the parent of SomeOtherActivity.
 This means that when the user clicks on the Up button in
 SomeOtherActivity’s app bar, MainActivity will be
 displayed
+Project names should be unique +
 */
 
 public class MainActivity extends AppCompatActivity implements ProjectList.Listener{
@@ -49,12 +52,13 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
         setContentView(R.layout.activity_main);
 
         Fragment plFragment = new ProjectList();
+
+
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.content_frame, plFragment);
         ft.commit();
 
-        AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
-        ProjectDao projectDao = db.projectDao();
+        db = DatabaseSingleton.getInstance(getApplicationContext());
 
         UserDao userDao = db.userDao();
         Executors.newSingleThreadExecutor().execute(new Runnable() {
@@ -68,16 +72,21 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
                 }
                 else {
                     userId = userDao.getAllUsers().get(0).getId();
-
                 }
             }
         });
 
+        /*DrawingDao drawingDao = db.drawingDao();
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                drawingDao.deleteAllDrawings();
+            }
+        });*/
     }
 
     @Override
     public void onResume(){
-        AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
         ProjectDao projectDao = db.projectDao();
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
@@ -93,17 +102,16 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
                     });
                 }
                 else {
-
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             textView.setVisibility(TextView.GONE);
                         }
                     });
-
                 }
             }
         });
+
         super.onResume();
     }
 
@@ -134,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
 
         intent.putExtra(WorkActivity.EXTRA_PROJECT_ID, (int) id);
         intent.putExtra(WorkActivity.EXTRA_CURRENT_USER_ID, (int) userId);
-        System.out.println(userId);
+
         startActivity(intent);
     }
 }

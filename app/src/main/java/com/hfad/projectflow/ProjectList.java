@@ -2,6 +2,7 @@ package com.hfad.projectflow;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -34,10 +35,17 @@ public class ProjectList extends ListFragment{
     private List<String> names = new ArrayList<>();
     private List<Project> projectList;
     private CustomArrayAdapter arrayAdapter;
+    private boolean isLargeScreen;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        isLargeScreen = (getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+
+
 
         // Inflate the layout for this fragment
         return super.onCreateView(inflater, container, savedInstanceState);
@@ -62,7 +70,7 @@ public class ProjectList extends ListFragment{
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        arrayAdapter = new CustomArrayAdapter(getActivity(), names);
+                        arrayAdapter = new CustomArrayAdapter(getActivity(), names, isLargeScreen);
                         setListAdapter(arrayAdapter);
                     }
                 });
@@ -81,6 +89,7 @@ public class ProjectList extends ListFragment{
     public void onListItemClick(ListView listView, View itemView, int position, long id){
 
         String projectName = (String) getListAdapter().getItem(position);
+        System.out.println(projectName);
         AppDatabase db = DatabaseSingleton.getInstance(requireContext());
         ProjectDao projectDao = db.projectDao();
         Executors.newSingleThreadExecutor().execute(new Runnable() {

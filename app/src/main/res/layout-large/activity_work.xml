@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="2"
+    android:rowCount="2"
+    tools:context=".WorkActivity"
+    android:padding="8dp"
+    android:background="@color/colorPrimary"
+    android:theme="@style/ThemeOverlay.AppCompat.Light"
+    >
+
+    <TextView
+        android:id="@+id/documentation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:text="@string/documentation"
+        android:textSize="35sp"
+        android:gravity="center"
+        android:layout_gravity="fill"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_corner"
+        android:textColor="@color/roundedCornerText"
+        />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:gravity="center"
+        android:layout_gravity="fill"
+        android:text="@string/tasks"
+        android:textSize="35sp"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_corner"
+        android:textColor="@color/roundedCornerText"
+        />
+
+    <TextView
+        android:id="@+id/whiteboard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:gravity="center"
+        android:layout_gravity="fill"
+        android:text="@string/whiteboard"
+        android:textSize="35sp"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_corner"
+        android:textColor="@color/roundedCornerText"
+        />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:gravity="center"
+        android:layout_gravity="fill"
+        android:text="@string/dashboard"
+        android:textSize="35sp"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_corner"
+        android:textColor="@color/roundedCornerText"
+        />
+
+</GridLayout>

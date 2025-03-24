@@ -6,4 +6,7 @@
     <color name="colorPrimaryDark">#5b507a</color>
     <color name="colorAccent">#B9E28C</color>
     <color name="transparentWhite">#00FFFFFF</color>
+    <color name="roundedCornerBackground">#FFF</color>
+    <color name="roundedCornerText">#000</color>
+
 </resources>

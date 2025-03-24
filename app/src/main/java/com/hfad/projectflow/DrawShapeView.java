@@ -1,39 +1,76 @@
 package com.hfad.projectflow;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
+import com.hfad.projectflow.database.AppDatabase;
+import com.hfad.projectflow.database.DatabaseSingleton;
+import com.hfad.projectflow.database.Drawing;
+import com.hfad.projectflow.database.DrawingDao;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Executors;
+
+
+/*
+* get drawing from db +
+* get all the drawings +
+* add tabs for each drawing? or some other functionality to switch between them
+* override the coordinates for drawing circle
+*/
+/*
+Сохранять в БД при закрытии +
+Через кнопку сохранять файлом +
+Эту кнопку наверх к меню +
+Рисунок пропадает при повороте экрана!!! +
+Отключить тёмную тему на время +
+Что-то не так с передачей через файлы projectId +
+*/
 
 public class DrawShapeView extends View {
 
     private final Paint paint;
     private final Paint gridPaint;
 
-    private final Path path;
+    private Path path;
     private final Path previewPath;
+
+    private Bitmap bitmap;
 
     private final Matrix matrix;
     private final Matrix inverseMatrix;
     private float[] matrixValues;
 
-    private float startX, startY, endX, endY, currentX, currentY;
+
+    private float startX, startY, currentX, currentY;
     private ShapeType shapeType;
-    private List<Shape> shapes = new ArrayList<>();
 
     private final ScaleGestureDetector scaleGestureDetector;
     private final GestureDetector gestureDetector;
@@ -42,13 +79,13 @@ public class DrawShapeView extends View {
     public boolean grid = true;
     public boolean drawOnGrid = true;
     public boolean hand = false;
+    private int projectId;
+    private int drawingId;
+    private boolean newDrawing = false;
 
-    /*
-    back to drawing in onTouchEvent
-    gestureListener only for panning the canvas
-    hand in use
-    no custom detector
-     */
+    private WhiteBoardActivity activity;
+
+    private AppDatabase db;
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
@@ -65,11 +102,7 @@ public class DrawShapeView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.d("Event", "onScroll");
-            //Log.d("onScroll", String.valueOf(doubleTap));
             if (hand) panCanvas(-distanceX, -distanceY);
-            //if (!doubleTap) handleDrawing(e2);
-
             return true;
         }
 
@@ -77,6 +110,12 @@ public class DrawShapeView extends View {
 
     public DrawShapeView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setBackgroundColor(Color.WHITE);
+        if (context instanceof WhiteBoardActivity) {
+            activity = (WhiteBoardActivity) context;
+        } else {
+            throw new IllegalArgumentException("Context must be an instance of Activity");
+        }
 
         paint = new Paint();
         paint.setColor(Color.BLACK);
@@ -88,7 +127,7 @@ public class DrawShapeView extends View {
         gridPaint.setColor(Color.LTGRAY);
         gridPaint.setStrokeWidth(1);
 
-        path = new Path();
+
         previewPath = new Path();
 
         matrix = new Matrix();
@@ -99,28 +138,66 @@ public class DrawShapeView extends View {
 
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
         gestureDetector = new GestureDetector(context, new GestureListener());
+
+        db = DatabaseSingleton.getInstance(getContext());
+
+        if (path == null) {
+            path = new Path();
+        }
     }
 
 
     @Override
-    protected void onDraw(Canvas canvas){
-        /*super.onDraw(canvas);
-        drawGrid(canvas);
-        for (Shape shape : shapes) {
-            drawShape(canvas, shape);
-        }
-        drawShape(canvas, new Shape(shapeType, startX, startY, endX, endY));*/
-        super.onDraw(canvas);
+    protected void onAttachedToWindow() {
 
+        DrawingDao drawingDao = db.drawingDao();
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                // passing wrong id to the method!!!
+                List<Drawing> drawings = drawingDao.getDrawingsForProject(projectId);
+                if (!drawings.isEmpty()) {
+                    System.out.println("Drawings found");
+                    System.out.println("Amount: " + drawings.size());
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] drawingData = drawings.get(drawings.size()-1).drawingData;
+                            drawingId = drawings.get(drawings.size()-1).id;
+                            bitmap = convertByteArrayToBitmap(drawingData);
+                            System.out.println("Drawing Id: " + drawingId);
+                            invalidate();
+                        }
+                    });
+                }
+                else {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            newDrawing = true;
+                        }
+                    });
+                }
+            }
+        });
+
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDraw(@NonNull Canvas canvas){
+        super.onDraw(canvas);
 
         canvas.save();
         canvas.setMatrix(matrix);
 
-        if (grid) drawDynamicGrid(canvas);
-        canvas.drawPath(path, paint);
-        canvas.drawPath(previewPath, paint);
+        if (bitmap != null) canvas.drawBitmap(bitmap, 0, 0, null);
 
-        //if (shapeType != ShapeType.NONE) drawCurrentShapePreview(canvas);
+        if (grid) drawDynamicGrid(canvas);
+
+        canvas.drawPath(path, paint);
+
+        canvas.drawPath(previewPath, paint);
 
         canvas.restore();
     }
@@ -150,7 +227,6 @@ public class DrawShapeView extends View {
             canvas.drawLine(x, visibleTop, x, visibleBottom, gridPaint);
         }
     }
-
 
 
     private void drawGrid(Canvas canvas) {
@@ -185,28 +261,6 @@ public class DrawShapeView extends View {
 
     }
 
-    public void drawShape(Canvas canvas, Shape shape){
-        switch (shape.type){
-            case RECTANGLE:
-                canvas.drawRect(shape.startX, shape.startY, shape.endX, shape.endY, paint);
-                break;
-            case CIRCLE:
-                float radius = Math.max(Math.abs(shape.endX - shape.startX), Math.abs(shape.endY - shape.startY));
-                canvas.drawCircle(shape.startX, shape.startY, radius, paint);
-                break;
-            case LINE:
-                canvas.drawLine(shape.startX, shape.startY, shape.endX, shape.endY, paint);
-                // TO DO figure out how to add arrow ends, calculate the positions
-                break;
-            case DIAMOND:
-                canvas.drawLine(shape.startX, (shape.endY+shape.startY)/2, (shape.endX+shape.startX)/2, shape.startY, paint);
-                canvas.drawLine((shape.endX+shape.startX)/2, shape.startY, shape.endX, (shape.endY+shape.startY)/2, paint);
-                canvas.drawLine(shape.startX, (shape.endY+shape.startY)/2, (shape.endX+shape.startX)/2, shape.endY, paint);
-                canvas.drawLine((shape.endX+shape.startX)/2, shape.endY, shape.endX, (shape.endY+shape.startY)/2, paint);
-                break;
-        }
-    }
-
 
     private float snapToGrid(float coordinate){
         return Math.round(coordinate / gridSize) * gridSize;
@@ -221,12 +275,6 @@ public class DrawShapeView extends View {
         currentX = touchPoint[0];
         currentY = touchPoint[1];
 
-        //currentX = (int) event.getX();
-        //currentY = (int) event.getY();
-
-
-        boolean tempX = isEven(((int) currentX) /50);
-        boolean tempY = isEven(((int) currentY) /50);
 
         if (shapeType != ShapeType.NONE && !hand){
             switch (event.getAction()) {
@@ -265,9 +313,24 @@ public class DrawShapeView extends View {
                         previewPath.reset();
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
+                    } else if (shapeType == ShapeType.DIAMOND) {
+                        previewPath.reset();
+                        float leftX = startX;
+                        float leftY = (startY + currentY)/2;
+                        float rightX = currentX;
+                        float rightY = (startY + currentY)/2;
+                        float topX = (startX + currentX)/2;
+                        float topY = startY;
+                        float bottomX = (startX + currentX)/2;
+                        float bottomY = currentY;
+                        previewPath.moveTo(leftX, leftY);
+                        previewPath.lineTo(topX, topY);
+                        previewPath.lineTo(rightX, rightY);
+                        previewPath.lineTo(bottomX, bottomY);
+                        previewPath.close();
                     }
 
-                    //invalidate();
+
                     break;
                 case MotionEvent.ACTION_UP:
                     if (drawOnGrid){
@@ -284,10 +347,24 @@ public class DrawShapeView extends View {
                     } else if (shapeType == ShapeType.CIRCLE) {
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         path.addCircle(startX, startY, radius, Path.Direction.CW);
+                    } else if (shapeType == ShapeType.DIAMOND) {
+                        float leftX = startX;
+                        float leftY = (startY + currentY)/2;
+                        float rightX = currentX;
+                        float rightY = (startY + currentY)/2;
+                        float topX = (startX + currentX)/2;
+                        float topY = startY;
+                        float bottomX = (startX + currentX)/2;
+                        float bottomY = currentY;
+
+                        path.moveTo(leftX, leftY);
+                        path.lineTo(topX, topY);
+                        path.lineTo(rightX, rightY);
+                        path.lineTo(bottomX, bottomY);
+                        path.close();
                     }
                     previewPath.reset();
-                    //invalidate();
-                    //shapes.add(new Shape(shapeType, startX, startY, endX, endY));
+
 
                     break;
             }
@@ -299,9 +376,6 @@ public class DrawShapeView extends View {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     updateDrawing(currentX, currentY);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    // Optional: handle action up if needed
                     break;
             }
         }
@@ -354,6 +428,113 @@ public class DrawShapeView extends View {
     public void panCanvas(float dx, float dy) {
         matrix.postTranslate(dx, dy);
         invalidate();
+    }
+
+    public void resetBeforeSaving(){
+        matrix.reset();
+        grid = !grid;
+        invalidate();
+    }
+
+    // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom
+    public void saveDrawingToStorage() {
+        // Get the bitmap from the view
+        resetBeforeSaving();
+
+        Bitmap drawingBitmap = getBitmapFromView(this);
+
+        // Save the bitmap to external storage
+        try {
+            byte[] drawingData = convertBitmapToByteArray(drawingBitmap);
+            // Insert into database
+            if (newDrawing){
+                Drawing drawing = new Drawing();
+                drawingId = drawing.id;
+                drawing.projectId = projectId;
+                drawing.drawingData = drawingData;
+                new Thread(() -> {
+                    db.drawingDao().insertDrawing(drawing);
+                }).start();
+                System.out.println("Drawing saved to database");
+            }
+            else {
+                new Thread(()-> {
+                    Drawing drawing = db.drawingDao().getDrawingById(drawingId);
+                    drawing.drawingData = drawingData;
+                    db.drawingDao().updateDrawing(drawing);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("Drawing updated");
+                        }
+                    });
+                }).start();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Bitmap getBitmapFromView(View view) {
+        // Create a bitmap with the same dimensions as the view
+
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth()+50, view.getHeight()+50, Bitmap.Config.ARGB_8888);
+        // Create a canvas to draw on the bitmap
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.WHITE);
+
+        // Draw the view on the canvas
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    private byte[] convertBitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    public Bitmap convertByteArrayToBitmap(byte[] byteArray) {
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+    }
+
+    public void saveImageToExternalStorage() throws IOException {
+        Bitmap bitmap = getBitmapFromView(this);
+
+        System.out.println("saveImageToExternalStorage()");
+        // Get the current time for the file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        Log.d("Saving file: ", imageFileName);
+
+        // Check if the device is running Android Q or higher
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+        Uri uri = activity.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (uri != null) {
+            try (OutputStream outputStream = activity.getContentResolver().openOutputStream(uri)) {
+                assert outputStream != null;
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                Toast.makeText(activity, "Image saved to gallery", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void setProjectId(int projectId){
+        this.projectId = projectId;
+    }
+
+    public Path getPath(){
+        if (path.isEmpty()) System.out.println("empty path");
+        return path;
+    }
+    public void setPath(Path path){
+        this.path = path;
     }
 }
 

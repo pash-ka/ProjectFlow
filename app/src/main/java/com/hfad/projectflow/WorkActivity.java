@@ -8,7 +8,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Objects;
 
 
 public class WorkActivity extends AppCompatActivity {
@@ -23,17 +26,21 @@ public class WorkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-        SharedPreferences preferences = getSharedPreferences("ActivityAState", MODE_PRIVATE);
+        ActionBar actionBar = getSupportActionBar();
+        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
+
 
         Intent intent = getIntent();
         if (intent.getExtras() != null) {
-            Log.d("Intent", "not null");
             projectId = (int) intent.getExtras().get(EXTRA_PROJECT_ID);
             currentUserId = (int) intent.getExtras().get(EXTRA_CURRENT_USER_ID);
+            System.out.println("intent: " + projectId + " : " + currentUserId);
         }
         else {
+            SharedPreferences preferences = getSharedPreferences("ActivityAState", MODE_PRIVATE);
             projectId = preferences.getInt("projectId", 1);
             currentUserId = preferences.getInt("currentUserId", 1);
+            System.out.println(projectId + " : " + currentUserId);
         }
         /*
         projectId = (int) getIntent().getExtras().get(EXTRA_PROJECT_ID);
@@ -57,8 +64,8 @@ public class WorkActivity extends AppCompatActivity {
             }
         });
 
-        TextView blockSchemesView = findViewById(R.id.block_schemes);
-        blockSchemesView.setOnClickListener(new View.OnClickListener() {
+        TextView whiteBoardView = findViewById(R.id.whiteboard);
+        whiteBoardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(WorkActivity.this, WhiteBoardActivity.class);
@@ -84,13 +91,4 @@ public class WorkActivity extends AppCompatActivity {
         editor.apply(); // Apply changes
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SharedPreferences preferences = getSharedPreferences("ActivityAState", MODE_PRIVATE);
-
-        // Restore state variables
-        projectId = preferences.getInt("projectId", 1);
-        currentUserId = preferences.getInt("currentUserId", 1);
-    }
 }
