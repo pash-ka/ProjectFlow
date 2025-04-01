@@ -8,5 +8,11 @@
 
     </style>
 
+    <style name="Theme.ProjectFlow.ActionBar.WhiteBoard" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/black</item>
+    </style>
+
 
 </resources>

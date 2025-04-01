@@ -15,6 +15,7 @@
         <activity
             android:name=".WhiteBoardActivity"
             android:parentActivityName=".WorkActivity"
+            android:theme="@style/Theme.ProjectFlow.ActionBar.WhiteBoard"
 
             android:exported="false" />
         <activity

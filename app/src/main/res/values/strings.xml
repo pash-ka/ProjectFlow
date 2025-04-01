@@ -14,4 +14,8 @@
     <string name="scaling_mode">Hand</string>
     <string name="drawing_mode">Draw</string>
     <string name="save_image">Save the image</string>
+    <string name="nav_open_drawer">Open navigation drawer</string>
+    <string name="nav_close_drawer">Close navigation drawer\n</string>
+    <string name="image_thumbnail">image thumbnail</string>
+    <string name="new_image">New image</string>
 </resources>

@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -71,6 +72,8 @@ public class DrawShapeView extends View {
 
     private float startX, startY, currentX, currentY;
     private ShapeType shapeType;
+    private List<Shape> shapes = new ArrayList<>();
+
 
     private final ScaleGestureDetector scaleGestureDetector;
     private final GestureDetector gestureDetector;
@@ -81,7 +84,7 @@ public class DrawShapeView extends View {
     public boolean hand = false;
     private int projectId;
     private int drawingId;
-    private boolean newDrawing = false;
+    public boolean newDrawing = false;
 
     private WhiteBoardActivity activity;
 
@@ -89,7 +92,7 @@ public class DrawShapeView extends View {
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
-        public boolean onScale(ScaleGestureDetector detector) {
+        public boolean onScale(@NonNull ScaleGestureDetector detector) {
             if (hand) {
                 float scaleFactor = detector.getScaleFactor();
                 scaleCanvas(scaleFactor);
@@ -101,7 +104,7 @@ public class DrawShapeView extends View {
     private class GestureListener extends GestureDetector.SimpleOnGestureListener{
 
         @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
             if (hand) panCanvas(-distanceX, -distanceY);
             return true;
         }
@@ -126,7 +129,6 @@ public class DrawShapeView extends View {
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);
         gridPaint.setStrokeWidth(1);
-
 
         previewPath = new Path();
 
@@ -154,11 +156,11 @@ public class DrawShapeView extends View {
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                // passing wrong id to the method!!!
                 List<Drawing> drawings = drawingDao.getDrawingsForProject(projectId);
                 if (!drawings.isEmpty()) {
                     System.out.println("Drawings found");
                     System.out.println("Amount: " + drawings.size());
+
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -275,16 +277,11 @@ public class DrawShapeView extends View {
         currentX = touchPoint[0];
         currentY = touchPoint[1];
 
-
         if (shapeType != ShapeType.NONE && !hand){
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
                     if (drawOnGrid){
-                        /*
-                        startX = Math.abs(currentX % 50) < 25 ? (float) ((int) currentX /50) *50 : tempX ? (float) (Math.round(currentX /100))*100+(currentX>0 ? 50 : -50) : (float) (Math.round(currentX /100))*100;
-                        startY = Math.abs(currentY % 50) < 25 ? (float) ((int) currentY /50) *50 : tempY ? (float) (Math.round(currentY /100))*100+(currentY>0 ? 50 : -50) : (float) (Math.round(currentY /100))*100;
-                        */
                         startX = snapToGrid(currentX);
                         startY = snapToGrid(currentY);
                     }
@@ -308,12 +305,19 @@ public class DrawShapeView extends View {
                     }
                     else if (shapeType == ShapeType.RECTANGLE) {
                         previewPath.reset();
-                        previewPath.addRect(startX, startY, currentX, currentY, Path.Direction.CW);
-                    } else if (shapeType == ShapeType.CIRCLE) {
+                        float left = Math.min(startX, currentX);
+                        float right = Math.max(startX, currentX);
+                        float top = Math.min(startY, currentY);
+                        float bottom = Math.max(startY, currentY);
+
+                        previewPath.addRect(left, top, right, bottom, Path.Direction.CW);
+                    }
+                    else if (shapeType == ShapeType.CIRCLE) {
                         previewPath.reset();
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
-                    } else if (shapeType == ShapeType.DIAMOND) {
+                    }
+                    else if (shapeType == ShapeType.DIAMOND) {
                         previewPath.reset();
                         float leftX = startX;
                         float leftY = (startY + currentY)/2;
@@ -329,25 +333,29 @@ public class DrawShapeView extends View {
                         previewPath.lineTo(bottomX, bottomY);
                         previewPath.close();
                     }
-
-
                     break;
                 case MotionEvent.ACTION_UP:
                     if (drawOnGrid){
                         currentX = snapToGrid(currentX);
                         currentY = snapToGrid(currentY);
                     }
-
                     if (shapeType == ShapeType.LINE) {
                         path.moveTo(startX, startY);
                         path.lineTo(currentX, currentY);
 
-                    } else if (shapeType == ShapeType.RECTANGLE) {
-                        path.addRect(startX, startY, currentX, currentY, Path.Direction.CW);
-                    } else if (shapeType == ShapeType.CIRCLE) {
+                    }
+                    else if (shapeType == ShapeType.RECTANGLE) {
+                        float left = Math.min(startX, currentX);
+                        float right = Math.max(startX, currentX);
+                        float top = Math.min(startY, currentY);
+                        float bottom = Math.max(startY, currentY);
+                        path.addRect(left, top, right, bottom, Path.Direction.CW);
+                    }
+                    else if (shapeType == ShapeType.CIRCLE) {
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         path.addCircle(startX, startY, radius, Path.Direction.CW);
-                    } else if (shapeType == ShapeType.DIAMOND) {
+                    }
+                    else if (shapeType == ShapeType.DIAMOND) {
                         float leftX = startX;
                         float leftY = (startY + currentY)/2;
                         float rightX = currentX;
@@ -364,8 +372,6 @@ public class DrawShapeView extends View {
                         path.close();
                     }
                     previewPath.reset();
-
-
                     break;
             }
         }
@@ -416,6 +422,10 @@ public class DrawShapeView extends View {
     }
 
     public void clearCanvas() {
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle(); // Frees the memory used by the Bitmap
+            bitmap = null;    // Clears the reference to the Bitmap object
+        }
         path.reset();
         invalidate();
     }
@@ -434,6 +444,7 @@ public class DrawShapeView extends View {
         matrix.reset();
         grid = !grid;
         invalidate();
+
     }
 
     // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom
@@ -474,6 +485,8 @@ public class DrawShapeView extends View {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        grid = !grid;
+        path.reset();
     }
 
     private Bitmap getBitmapFromView(View view) {
@@ -529,12 +542,20 @@ public class DrawShapeView extends View {
         this.projectId = projectId;
     }
 
+    public void setDrawingId(int drawingId){
+        this.drawingId = drawingId;
+    }
+
     public Path getPath(){
         if (path.isEmpty()) System.out.println("empty path");
         return path;
     }
     public void setPath(Path path){
         this.path = path;
+    }
+
+    public void setBitmap(Bitmap bitmap){
+        this.bitmap = bitmap;
     }
 }
 

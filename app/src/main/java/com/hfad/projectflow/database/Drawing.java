@@ -20,4 +20,16 @@ public class Drawing {
 
     @ColumnInfo(name = "drawing_data", typeAffinity = ColumnInfo.BLOB)
     public byte[] drawingData;
+
+    public int getId() {
+        return id;
+    }
+
+    public byte[] getDrawingData() {
+        return drawingData;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
 }

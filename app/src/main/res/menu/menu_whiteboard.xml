@@ -7,5 +7,17 @@
         android:icon="@drawable/baseline_download_24"
         android:orderInCategory="1"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_new_image"
+        android:title="@string/new_image"
+        android:icon="@drawable/ic_add_white_24dp"
+        android:orderInCategory="2"
+        app:showAsAction="ifRoom"
+        />
+
+    <!--
+    maybe get rid of it and just add these options into drawer
+    -->
+
 
 </menu>

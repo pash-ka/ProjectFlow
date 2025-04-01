@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Outer Circle -->
+    <path
+        android:fillColor="@color/colorPrimary"
+        android:pathData="M24,24m-20,0a20,20 0,1,1 40,0a20,20 0,1,1 -40,0" />
+
+    <!-- Smaller Inner Dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,24m-3,0a3,3 0,1,1 6,0a3,3 0,1,1 -6,0" />
+</vector>
