@@ -43,8 +43,8 @@ import java.util.concurrent.Executors;
 /*
 * get drawing from db +
 * get all the drawings +
-* add tabs for each drawing? or some other functionality to switch between them
-* override the coordinates for drawing circle
+* add tabs for each drawing? or some other functionality to switch between them +
+* !!! problems with matrix transformation when switching between drawings via drawer, coordinates are going crazy!!!
 */
 /*
 Сохранять в БД при закрытии +
@@ -59,11 +59,15 @@ public class DrawShapeView extends View {
 
     private final Paint paint;
     private final Paint gridPaint;
+    public Paint strokePaint7;
+    public Paint strokePaint13;
+    public Paint strokePaint16;
 
     private Path path;
     private final Path previewPath;
 
     private Bitmap bitmap;
+    private Bitmap oldContentBitmap;
 
     private final Matrix matrix;
     private final Matrix inverseMatrix;
@@ -84,7 +88,16 @@ public class DrawShapeView extends View {
     public boolean hand = false;
     private int projectId;
     private int drawingId;
+    private boolean newArea = false;
+
+    private final int toolbarOffset = 128;
     public boolean newDrawing = false;
+
+    float minX = Float.MAX_VALUE;
+    float maxX = Float.MIN_VALUE;
+    float minY = Float.MAX_VALUE;
+    float maxY = Float.MIN_VALUE;
+
 
     private WhiteBoardActivity activity;
 
@@ -125,6 +138,19 @@ public class DrawShapeView extends View {
         paint.setStrokeWidth(10f);
         paint.setStyle(Paint.Style.STROKE);
 
+        strokePaint7 = new Paint();
+        strokePaint7.setColor(Color.BLACK);
+        strokePaint7.setStrokeWidth(7f);
+        strokePaint7.setStyle(Paint.Style.STROKE);
+        strokePaint13 = new Paint();
+        strokePaint13.setColor(Color.BLACK);
+        strokePaint13.setStrokeWidth(13f);
+        strokePaint13.setStyle(Paint.Style.STROKE);
+
+        strokePaint16 = new Paint();
+        strokePaint16.setColor(Color.BLACK);
+        strokePaint16.setStrokeWidth(16f);
+        strokePaint16.setStyle(Paint.Style.STROKE);
 
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);
@@ -167,7 +193,9 @@ public class DrawShapeView extends View {
                             byte[] drawingData = drawings.get(drawings.size()-1).drawingData;
                             drawingId = drawings.get(drawings.size()-1).id;
                             bitmap = convertByteArrayToBitmap(drawingData);
+                            setBoundsForLoadedBitmap(bitmap);
                             System.out.println("Drawing Id: " + drawingId);
+                            System.out.println("bitmap width: " + bitmap.getWidth());
                             invalidate();
                         }
                     });
@@ -193,8 +221,8 @@ public class DrawShapeView extends View {
         canvas.save();
         canvas.setMatrix(matrix);
 
-        if (bitmap != null) canvas.drawBitmap(bitmap, 0, 0, null);
-
+        if (bitmap != null) canvas.drawBitmap(bitmap, 0, toolbarOffset, null);
+        if (oldContentBitmap != null) canvas.drawBitmap(oldContentBitmap, 0, 0, null);
         if (grid) drawDynamicGrid(canvas);
 
         canvas.drawPath(path, paint);
@@ -229,40 +257,6 @@ public class DrawShapeView extends View {
             canvas.drawLine(x, visibleTop, x, visibleBottom, gridPaint);
         }
     }
-
-
-    private void drawGrid(Canvas canvas) {
-
-        float[] values = new float[9];
-        matrix.getValues(values);
-
-        float scaleX = values[Matrix.MSCALE_X];
-        float scaleY = values[Matrix.MSCALE_Y];
-        float translateX = values[Matrix.MTRANS_X];
-        float translateY = values[Matrix.MTRANS_Y];
-
-        int width = getWidth();
-        int height = getHeight();
-
-        // Calculate the start and end points for the grid lines
-        float startX = (translateX % (gridSize * scaleX)) - width;
-        float startY = (translateY % (gridSize * scaleY)) - height;
-        float endX = startX + width * 2;
-        float endY = startY + height * 2;
-
-        // Draw vertical grid lines
-        for (float x = startX; x < endX; x += gridSize * scaleX) {
-            canvas.drawLine(x, startY, x, endY, gridPaint);
-        }
-
-        // Draw horizontal grid lines
-        for (float y = startY; y < endY; y += gridSize * scaleY) {
-            canvas.drawLine(startX, y, endX, y, gridPaint);
-        }
-
-
-    }
-
 
     private float snapToGrid(float coordinate){
         return Math.round(coordinate / gridSize) * gridSize;
@@ -316,6 +310,8 @@ public class DrawShapeView extends View {
                         previewPath.reset();
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
+
+
                     }
                     else if (shapeType == ShapeType.DIAMOND) {
                         previewPath.reset();
@@ -342,7 +338,6 @@ public class DrawShapeView extends View {
                     if (shapeType == ShapeType.LINE) {
                         path.moveTo(startX, startY);
                         path.lineTo(currentX, currentY);
-
                     }
                     else if (shapeType == ShapeType.RECTANGLE) {
                         float left = Math.min(startX, currentX);
@@ -354,6 +349,8 @@ public class DrawShapeView extends View {
                     else if (shapeType == ShapeType.CIRCLE) {
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         path.addCircle(startX, startY, radius, Path.Direction.CW);
+                        updateBounds(startX-radius, startY-radius);
+                        updateBounds(startX+radius, startY+radius);
                     }
                     else if (shapeType == ShapeType.DIAMOND) {
                         float leftX = startX;
@@ -372,6 +369,8 @@ public class DrawShapeView extends View {
                         path.close();
                     }
                     previewPath.reset();
+                    updateBounds(startX, startY);
+                    updateBounds(currentX, currentY);
                     break;
             }
         }
@@ -384,6 +383,7 @@ public class DrawShapeView extends View {
                     updateDrawing(currentX, currentY);
                     break;
             }
+            updateBounds(currentX, currentY);
         }
         else{
             scaleGestureDetector.onTouchEvent(event);
@@ -418,6 +418,12 @@ public class DrawShapeView extends View {
     }
 
     public void setPaintStrokeWidth(float width) {
+        boolean temp = grid;
+        grid = false;
+        oldContentBitmap = getBitmapFromView(this);
+        path.reset();
+        bitmap = null;
+        grid = temp;
         paint.setStrokeWidth(width);
     }
 
@@ -426,6 +432,7 @@ public class DrawShapeView extends View {
             bitmap.recycle(); // Frees the memory used by the Bitmap
             bitmap = null;    // Clears the reference to the Bitmap object
         }
+        matrix.reset();
         path.reset();
         invalidate();
     }
@@ -440,18 +447,15 @@ public class DrawShapeView extends View {
         invalidate();
     }
 
-    public void resetBeforeSaving(){
-        matrix.reset();
-        grid = !grid;
+    /*public void resetBeforeSaving(){
+        boolean temp = grid;
+        grid = false;
         invalidate();
-
-    }
+    }*/
 
     // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom
     public void saveDrawingToStorage() {
         // Get the bitmap from the view
-        resetBeforeSaving();
-
         Bitmap drawingBitmap = getBitmapFromView(this);
 
         // Save the bitmap to external storage
@@ -485,21 +489,47 @@ public class DrawShapeView extends View {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        grid = !grid;
-        path.reset();
     }
 
     private Bitmap getBitmapFromView(View view) {
-        // Create a bitmap with the same dimensions as the view
 
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth()+50, view.getHeight()+50, Bitmap.Config.ARGB_8888);
+        boolean temp = grid;
+        grid = false;
+
+        // Create a bitmap with the same dimensions as the view
+        int bitmapWidth;
+        int bitmapHeight;
+        int offset;
+
+        matrix.reset();
+        invalidate();
+
+        if (newArea){
+            offset = 10;
+            bitmapWidth = (int) (maxX - minX) + offset;
+            bitmapHeight = (int) (maxY - minY) + offset;
+        }
+        else{
+            offset = 0;
+            bitmapWidth = (int) (maxX - minX);
+            bitmapHeight = (int) (maxY - minY);
+        }
+
+        Bitmap bm = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
         // Create a canvas to draw on the bitmap
-        Canvas canvas = new Canvas(bitmap);
+        Canvas canvas = new Canvas(bm);
+//        if (minX < 0 && minY < 0) panCanvas(-minX-(offset/2.f), -minY-(offset/2.f));
+//        else if (minX < 0 && minY > 0) panCanvas(-minX-(offset/2.f), -minY+(offset/2.f));
+//        else if (minX > 0 && minY < 0) panCanvas(-minX+(offset/2.f), -minY-(offset/2.f));
+        panCanvas(-minX+(offset/2.f), -minY+(offset/2.f));
+        System.out.println("-minX: " + (-minX) + " -minY: " + (-minY));
         canvas.drawColor(Color.WHITE);
 
         // Draw the view on the canvas
         view.draw(canvas);
-        return bitmap;
+        grid = temp;
+        return bm;
     }
 
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {
@@ -550,12 +580,52 @@ public class DrawShapeView extends View {
         if (path.isEmpty()) System.out.println("empty path");
         return path;
     }
+
     public void setPath(Path path){
         this.path = path;
     }
 
     public void setBitmap(Bitmap bitmap){
         this.bitmap = bitmap;
+        setBoundsForLoadedBitmap(bitmap);
+    }
+
+    private void updateBounds(float x, float y) {
+        if (x < minX) {
+            minX = x;
+            newArea = true;
+        }
+        if (x > maxX) {
+            maxX = x;
+            newArea = true;
+        }
+        if (y < minY) {
+            minY = y;
+            newArea = true;
+        }
+        if (y > maxY) {
+            maxY = y;
+            newArea = true;
+        }
+    }
+
+    public void resetBounds(){
+        minX = Float.MAX_VALUE;
+        maxX = Float.MIN_VALUE;
+        minY = Float.MAX_VALUE;
+        maxY = Float.MIN_VALUE;
+    }
+
+    private void setBoundsForLoadedBitmap(Bitmap bitmap){
+        minX = 0;
+        minY = toolbarOffset;
+        maxX = bitmap.getWidth();
+        maxY = bitmap.getHeight()+toolbarOffset;
+    }
+
+    public void resetMatrix(){
+        matrix.reset();
+        invalidate();
     }
 }
 

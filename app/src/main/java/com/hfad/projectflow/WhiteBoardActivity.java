@@ -55,6 +55,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -155,6 +156,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             @Override
             public void onClick(View view) {
                 drawShapeView.setShapeType(ShapeType.LINE);
+                //drawShapeView.resetMatrix();
             }
         });
 
@@ -172,6 +174,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 drawShapeView.grid = !drawShapeView.grid;
                 drawShapeView.drawOnGrid = !drawShapeView.drawOnGrid;
+
                 drawShapeView.invalidate();
             }
         });
@@ -259,15 +262,16 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
 
             try {
                 drawShapeView.saveImageToExternalStorage();
+                Toast.makeText(getApplicationContext(), "Image saved", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             return true;
         } else if (item.getItemId() == R.id.action_new_image) {
             drawShapeView.saveDrawingToStorage();
-            drawShapeView.grid = true;
             drawShapeView.newDrawing = true;
             drawShapeView.clearCanvas();
+            drawShapeView.resetBounds();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -343,16 +347,21 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         return path;
     }
 
-
     @Override
     public void onItemClick(int position) {
         Drawing thumbnail = navDrawerAdapter.getThumbnails().get(position);
+
         drawShapeView.saveDrawingToStorage();
+
+        drawShapeView.clearCanvas();
+        drawShapeView.resetBounds();
+
         drawShapeView.newDrawing = false;
         drawShapeView.setBitmap(drawShapeView.convertByteArrayToBitmap(thumbnail.getDrawingData()));
-        drawShapeView.invalidate();
         drawShapeView.setDrawingId(thumbnail.getId());
+
         drawerLayout.closeDrawer(GravityCompat.START);
+        drawShapeView.invalidate();
     }
 
 

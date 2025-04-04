@@ -76,13 +76,13 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
             }
         });
 
-        /*DrawingDao drawingDao = db.drawingDao();
+        DrawingDao drawingDao = db.drawingDao();
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 drawingDao.deleteAllDrawings();
             }
-        });*/
+        });
     }
 
     @Override

@@ -14,8 +14,7 @@
         android:scaleType="fitCenter"
         android:src="@android:drawable/ic_menu_gallery"
         android:padding="10dp"
-        android:background="@drawable/rounded_corner"
-        android:backgroundTint="@color/colorPrimary"
+        android:background="@drawable/rounded_corner_stroke"
         />
 
 </LinearLayout>

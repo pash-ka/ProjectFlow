@@ -34,8 +34,8 @@
 
             <ToggleButton
                 android:id="@+id/hand_toggle"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:textOn=""
                 android:textOff=""
                 android:background="@drawable/hand_toggle_selector"
@@ -44,8 +44,8 @@
 
             <ToggleButton
                 android:id="@+id/grid_toggle"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:background="@drawable/grid_toggle_selector"
                 android:textOn=""
                 android:textOff=""
@@ -54,62 +54,119 @@
         </LinearLayout>
 
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/shapes_switch"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:contentDescription="@string/drawing_mode"
-            android:layout_alignParentBottom="true"
+        <LinearLayout
+            android:id="@+id/switch_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="3dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/shapes_icon"
-            tools:ignore="RelativeOverlap" />
+            android:layout_alignParentBottom="true">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/stroke_switch"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/stroke_width"
+                android:layout_marginEnd="5dp"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/shapes_switch"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/shapes_icon"
+                android:layout_marginStart="5dp"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/stroke_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_above="@+id/switch_buttons"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/stroke_small"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/stroke_width_small"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/stroke_default"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/stroke_width"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/stroke_normal"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/stroke_width_normal"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/stroke_big"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/stroke_width_big"/>
+
+        </LinearLayout>
+
+
 
         <LinearLayout
             android:id="@+id/shape_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/shapes_switch"
+            android:layout_above="@+id/switch_buttons"
             android:layout_centerHorizontal="true"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/brush_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="75dp"
+                android:layout_height="60dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/baseline_brush_24" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/rect_button"
-                android:layout_width="50dp"
-                android:layout_height="40dp"
-                android:layout_margin="3dp"
+                android:layout_width="75dp"
+                android:layout_height="60dp"
+                android:layout_margin="5dp"
                 android:background="@drawable/baseline_crop_square_24" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/circle_button"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/outline_circle_24" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/diamond_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="75dp"
+                android:layout_height="60dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/diamond_shape" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/line_button"
-                android:layout_width="wrap_content"
+                android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/line_shape" />
 
         </LinearLayout>
-
 
 
     </RelativeLayout>
@@ -120,7 +177,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/white"
-        android:padding="8dp"
+        android:padding="6dp"
         />
 </androidx.drawerlayout.widget.DrawerLayout>
 

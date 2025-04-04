@@ -23,7 +23,7 @@
         android:gravity="center"
         android:layout_gravity="fill"
         android:layout_margin="8dp"
-        android:background="@drawable/rounded_corner"
+        android:background="@drawable/rounded_corner_solid"
         android:textColor="@color/roundedCornerText"
         />
 
@@ -37,7 +37,7 @@
         android:text="@string/tasks"
         android:textSize="35sp"
         android:layout_margin="8dp"
-        android:background="@drawable/rounded_corner"
+        android:background="@drawable/rounded_corner_solid"
         android:textColor="@color/roundedCornerText"
         />
 
@@ -52,7 +52,7 @@
         android:text="@string/whiteboard"
         android:textSize="35sp"
         android:layout_margin="8dp"
-        android:background="@drawable/rounded_corner"
+        android:background="@drawable/rounded_corner_solid"
         android:textColor="@color/roundedCornerText"
         />
 
@@ -66,7 +66,7 @@
         android:text="@string/dashboard"
         android:textSize="35sp"
         android:layout_margin="8dp"
-        android:background="@drawable/rounded_corner"
+        android:background="@drawable/rounded_corner_solid"
         android:textColor="@color/roundedCornerText"
         />
 

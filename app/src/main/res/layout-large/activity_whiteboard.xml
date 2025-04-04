@@ -67,6 +67,7 @@
                 android:id="@+id/stroke_switch"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/stroke_width"
                 />
 
@@ -74,6 +75,7 @@
                 android:id="@+id/shapes_switch"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_marginStart="10dp"
                 android:background="@drawable/shapes_icon"
                 />
 
@@ -167,12 +169,11 @@
         </LinearLayout>
 
 
-
     </RelativeLayout>
     
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/nav_recycler_view"
-        android:layout_width="280dp"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/white"
