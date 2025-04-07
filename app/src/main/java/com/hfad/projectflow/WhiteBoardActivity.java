@@ -24,10 +24,10 @@ navigation view that defines the drawer as its second
 */
 
 /*TODO
-* pencils/brushes
+* pencils/brushes +
 * shapes
 * grid on/off +
-* place it all somewhere nice, menu
+* place it all somewhere nice, menu +
 * infinite canvas +
 */
 
@@ -46,6 +46,7 @@ navigation view that defines the drawer as its second
 
 
 
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.os.Bundle;
@@ -53,7 +54,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -90,7 +90,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
     private NavDrawerAdapter navDrawerAdapter;
     private DrawerLayout drawerLayout;
 
-    public int projectId, currentUserId;
+    public int projectId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +117,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         WhiteBoardViewModelFactory factory = new WhiteBoardViewModelFactory(drawingDao, projectId, this);
         WhiteBoardViewModel viewModel = new ViewModelProvider(this, factory).get(WhiteBoardViewModel.class);
         navDrawerAdapter = new NavDrawerAdapter(new ArrayList<>(),  WhiteBoardActivity.this);
-        navRecyclerView.setLayoutManager(new LinearLayoutManager(WhiteBoardActivity.this));;
+        navRecyclerView.setLayoutManager(new LinearLayoutManager(WhiteBoardActivity.this));
         navRecyclerView.setAdapter(navDrawerAdapter);
 
         drawerLayout.addDrawerListener(toggle);
@@ -128,64 +128,43 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         drawShapeView.setProjectId(projectId);
 
         Button brushButton = findViewById(R.id.brush_button);
-        brushButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawShapeView.setShapeType(ShapeType.NONE);
-            }
+        brushButton.setOnClickListener(view -> {
+            drawShapeView.setShapeType(ShapeType.NONE);
+            drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
         });
 
         Button rectButton = findViewById(R.id.rect_button);
-        rectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawShapeView.setShapeType(ShapeType.RECTANGLE);
-            }
+        rectButton.setOnClickListener(view -> {
+            drawShapeView.setShapeType(ShapeType.RECTANGLE);
+            drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
         });
 
         Button circleButton = findViewById(R.id.circle_button);
-        circleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawShapeView.setShapeType(ShapeType.CIRCLE);
-            }
+        circleButton.setOnClickListener(view -> {
+            drawShapeView.setShapeType(ShapeType.CIRCLE);
+            drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
         });
 
         Button lineButton = findViewById(R.id.line_button);
-        lineButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawShapeView.setShapeType(ShapeType.LINE);
-                //drawShapeView.resetMatrix();
-            }
+        lineButton.setOnClickListener(view -> {
+            drawShapeView.setShapeType(ShapeType.LINE);
+            drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
         });
 
         Button diamondButton = findViewById(R.id.diamond_button);
-        diamondButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawShapeView.setShapeType(ShapeType.DIAMOND);
-            }
+        diamondButton.setOnClickListener(v -> {
+            drawShapeView.setShapeType(ShapeType.DIAMOND);
+            drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
         });
 
         ToggleButton gridTB = findViewById(R.id.grid_toggle);
-        gridTB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                drawShapeView.grid = !drawShapeView.grid;
-                drawShapeView.drawOnGrid = !drawShapeView.drawOnGrid;
-
-                drawShapeView.invalidate();
-            }
+        gridTB.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            drawShapeView.grid = !drawShapeView.grid;
+            drawShapeView.invalidate();
         });
 
         ToggleButton handTB = findViewById(R.id.hand_toggle);
-        handTB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                drawShapeView.hand = !drawShapeView.hand;
-            }
-        });
+        handTB.setOnCheckedChangeListener((buttonView, isChecked) -> drawShapeView.hand = !drawShapeView.hand);
 
 
         LinearLayout stroke_buttons = findViewById(R.id.stroke_buttons);
@@ -200,45 +179,14 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             }
         }
 
-
         AppCompatImageButton switch_shapes = findViewById(R.id.shapes_switch);
         switch_shapes.setOnClickListener(new SwitchesOnCLickListener());
-        /*switch_shapes.setOnClickListener(new View.OnClickListener() {
-            boolean visible = false;
-            @Override
-            public void onClick(View v) {
-                if (!visible) {
-                    shapeButtons.setVisibility(View.VISIBLE);
-                    strokeButtons.setVisibility(View.GONE);
-                    visible = true;
-                }
-                else {
-                    shapeButtons.setVisibility(View.GONE);
-                    visible = false;
-                }
-            }
-        });*/
-
 
         AppCompatImageButton switch_stroke = findViewById(R.id.stroke_switch);
         switch_stroke.setOnClickListener(new SwitchesOnCLickListener());
-        /*switch_stroke.setOnClickListener(new View.OnClickListener() {
-            boolean visible = false;
-            @Override
-            public void onClick(View v) {
-                if (!visible) {
-                    strokeButtons.setVisibility(View.VISIBLE);
-                    shapeButtons.setVisibility(View.GONE);
-                    visible = true;
-                }
-                else {
-                    strokeButtons.setVisibility(View.GONE);
-                    visible = false;
-                }
-            }
-        });*/
 
-
+        AppCompatImageButton eraserButton = findViewById(R.id.eraser_button);
+        eraserButton.setOnClickListener(new SwitchesOnCLickListener());
 
     }
 
@@ -373,6 +321,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
 
         AppCompatImageButton strokeSwitch = findViewById(R.id.stroke_switch);
         AppCompatImageButton shapeSwitch = findViewById(R.id.shapes_switch);
+        AppCompatImageButton eraserButton = findViewById(R.id.eraser_button);
 
         LinearLayout shapeButtons = findViewById(R.id.shape_buttons);
         LinearLayout strokeButtons = findViewById(R.id.stroke_buttons);
@@ -381,6 +330,8 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         @Override
         public void onClick(View v) {
             if (v == strokeSwitch){
+                drawShapeView.setPaintColor(Color.BLACK);
+                drawShapeView.setEraser(false);
                 int visible = strokeButtons.getVisibility();
                 if (visible == View.GONE){
                     strokeButtons.setVisibility(View.VISIBLE);
@@ -391,6 +342,8 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
                 }
             }
             else if (v == shapeSwitch){
+                drawShapeView.setPaintColor(Color.BLACK);
+                drawShapeView.setEraser(false);
                 int visible = shapeButtons.getVisibility();
                 if (visible == View.GONE){
                     shapeButtons.setVisibility(View.VISIBLE);
@@ -399,6 +352,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
                 else {
                     shapeButtons.setVisibility(View.GONE);
                 }
+            }
+            else if (v == eraserButton) {
+                drawShapeView.eraserOn();
+                strokeButtons.setVisibility(View.GONE);
+                shapeButtons.setVisibility(View.GONE);
             }
         }
     }
@@ -410,22 +368,20 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         AppCompatImageButton strokeNormal = findViewById(R.id.stroke_normal);
         AppCompatImageButton strokeBig = findViewById(R.id.stroke_big);
 
-        LinearLayout strokeButtons = findViewById(R.id.stroke_buttons);
+        //LinearLayout strokeButtons = findViewById(R.id.stroke_buttons);
 
         @Override
         public void onClick(View v) {
             if (v == strokeSmall){
-                drawShapeView.setPaintStrokeWidth(7f);
+                drawShapeView.setPaintStrokeWidth(5f);
             } else if (v == strokeDefault) {
                 drawShapeView.setPaintStrokeWidth(10f);
             } else if (v == strokeNormal) {
-                drawShapeView.setPaintStrokeWidth(13f);
+                drawShapeView.setPaintStrokeWidth(15f);
             } else if (v == strokeBig) {
-                drawShapeView.setPaintStrokeWidth(16f);
+                drawShapeView.setPaintStrokeWidth(20f);
             }
-
         }
-
     }
 }
 

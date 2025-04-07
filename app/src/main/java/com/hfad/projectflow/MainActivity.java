@@ -2,14 +2,12 @@ package com.hfad.projectflow;
 
 import android.content.Intent;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -61,54 +59,33 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
         db = DatabaseSingleton.getInstance(getApplicationContext());
 
         UserDao userDao = db.userDao();
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                if (userDao.getAllUsers().isEmpty()){
-                    User user = new User();
-                    user.name = "Pasha";
-                    user.email = "pasha@gmail.com";
-                    userId = userDao.insert(user);
-                }
-                else {
-                    userId = userDao.getAllUsers().get(0).getId();
-                }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            if (userDao.getAllUsers().isEmpty()){
+                User user = new User();
+                user.name = "Pasha";
+                user.email = "pasha@gmail.com";
+                userId = userDao.insert(user);
+            }
+            else {
+                userId = userDao.getAllUsers().get(0).getId();
             }
         });
 
         DrawingDao drawingDao = db.drawingDao();
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                drawingDao.deleteAllDrawings();
-            }
-        });
+        Executors.newSingleThreadExecutor().execute(drawingDao::deleteAllDrawings);
     }
 
     @Override
     public void onResume(){
         ProjectDao projectDao = db.projectDao();
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                projectList = projectDao.getAllProjects();
-                TextView textView = findViewById(R.id.text_placeholder);
-                if (projectList.isEmpty()) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textView.setText(R.string.no_projects);
-                        }
-                    });
-                }
-                else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textView.setVisibility(TextView.GONE);
-                        }
-                    });
-                }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            projectList = projectDao.getAllProjects();
+            TextView textView = findViewById(R.id.text_placeholder);
+            if (projectList.isEmpty()) {
+                runOnUiThread(() -> textView.setText(R.string.no_projects));
+            }
+            else {
+                runOnUiThread(() -> textView.setVisibility(TextView.GONE));
             }
         });
 
