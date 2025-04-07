@@ -366,7 +366,6 @@ public class DrawShapeView extends View {
         invalidate();
 
         return true;
-
     }
 
     private void startDrawing(float x, float y) {
@@ -386,6 +385,11 @@ public class DrawShapeView extends View {
         resetBitmap();
         paint.setColor(color);
     }
+
+    public int getPaintColor(){
+        return paint.getColor();
+    }
+
     public void eraserOn(){
         setEraser(true);
         setPaintStrokeWidth(80f);
@@ -510,7 +514,6 @@ public class DrawShapeView extends View {
             Canvas canvas = new Canvas(bm);
 
             panCanvas(-minX, -minY);
-            System.out.println("-minX: " + (-minX) + " -minY: " + (-minY));
             canvas.drawColor(Color.WHITE);
 
             // Draw the view on the canvas
@@ -518,10 +521,7 @@ public class DrawShapeView extends View {
             grid = temp;
             panCanvas(minX, minY);
             matrix.set(tempMx);
-
         }
-
-
         return bm;
     }
 

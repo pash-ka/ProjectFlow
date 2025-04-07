@@ -63,6 +63,21 @@
             android:layout_alignParentBottom="true">
 
             <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/eraser_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/eraser"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/color_switch"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/outline_color_lens_24"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/stroke_switch"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
@@ -78,6 +93,56 @@
                 android:layout_marginStart="5dp"
                 />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/color_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/switch_buttons"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/black_color_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:backgroundTint="@android:color/transparent"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/red_color_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:backgroundTint="@android:color/transparent"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/green_color_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:backgroundTint="@android:color/transparent"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/blue_color_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:backgroundTint="@android:color/transparent"
+                />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/yellow_color_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:backgroundTint="@android:color/transparent"
+                />
         </LinearLayout>
 
         <LinearLayout

@@ -42,13 +42,15 @@ navigation view that defines the drawer as its second
 *  */
 
 /*
-* need separate paint for every stroke width? or each shape?*/
-
+* need separate paint for every stroke width? or each shape? no, solved +++
+* maybe rewrite the onClicklistener for shapes just like for strokes
+*/
 
 
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -63,13 +65,12 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import com.hfad.projectflow.database.AppDatabase;
 import com.hfad.projectflow.database.DatabaseSingleton;
@@ -78,15 +79,15 @@ import com.hfad.projectflow.database.DrawingDao;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAdapter.OnClickListener{
+public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAdapter.OnClickListener {
 
+    // intent constants
     public static final String EXTRA_PROJECT_ID = "id";
     public static final String EXTRA_CURRENT_USER_ID = "userId";
+
     private DrawShapeView drawShapeView;
-    private LiveData<List<Thumbnail>> thumbnails;
     private NavDrawerAdapter navDrawerAdapter;
     private DrawerLayout drawerLayout;
 
@@ -114,9 +115,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         AppDatabase db = DatabaseSingleton.getInstance(this);
         DrawingDao drawingDao = db.drawingDao();
 
+        // updating drawer after all the thumbnails are loaded
         WhiteBoardViewModelFactory factory = new WhiteBoardViewModelFactory(drawingDao, projectId, this);
         WhiteBoardViewModel viewModel = new ViewModelProvider(this, factory).get(WhiteBoardViewModel.class);
-        navDrawerAdapter = new NavDrawerAdapter(new ArrayList<>(),  WhiteBoardActivity.this);
+
+        navDrawerAdapter = new NavDrawerAdapter(new ArrayList<>(), WhiteBoardActivity.this);
         navRecyclerView.setLayoutManager(new LinearLayoutManager(WhiteBoardActivity.this));
         navRecyclerView.setAdapter(navDrawerAdapter);
 
@@ -188,6 +191,10 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         AppCompatImageButton eraserButton = findViewById(R.id.eraser_button);
         eraserButton.setOnClickListener(new SwitchesOnCLickListener());
 
+        AppCompatImageButton colorButton = findViewById(R.id.color_switch);
+        colorButton.setOnClickListener(new SwitchesOnCLickListener());
+        setUpColorDrawables();
+
     }
 
     @Override
@@ -206,7 +213,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if (item.getItemId() == R.id.action_save_image){
+        if (item.getItemId() == R.id.action_save_image) {
 
             try {
                 drawShapeView.saveImageToExternalStorage();
@@ -295,6 +302,34 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         return path;
     }
 
+    private void setUpColorDrawables() {
+        Drawable baseDrawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.baseline_circle_24);
+        int[] colors = new int[]{
+                Color.BLACK,
+                Color.RED,
+                Color.GREEN,
+                Color.BLUE,
+                Color.YELLOW
+        };
+
+        LinearLayout color_buttons = findViewById(R.id.color_buttons);
+        for (int i = 0; i < color_buttons.getChildCount(); i++) {
+            View child = color_buttons.getChildAt(i);
+
+            // Check if the child is a Button
+            if (child instanceof AppCompatImageButton) {
+                // Cast to Button and set OnClickListener
+                AppCompatImageButton button = (AppCompatImageButton) child;
+                assert baseDrawable != null;
+                Drawable buttonDrawable = Objects.requireNonNull(baseDrawable.getConstantState()).newDrawable().mutate();
+                buttonDrawable.setTint(colors[i]);
+                button.setImageDrawable(buttonDrawable);
+
+                button.setOnClickListener(new ColorOnClickListener());
+            }
+        }
+    }
+
     @Override
     public void onItemClick(int position) {
         Drawing thumbnail = navDrawerAdapter.getThumbnails().get(position);
@@ -313,7 +348,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
     }
 
 
-    public NavDrawerAdapter getNavDrawerAdapter(){
+    public NavDrawerAdapter getNavDrawerAdapter() {
         return navDrawerAdapter;
     }
 
@@ -322,41 +357,60 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         AppCompatImageButton strokeSwitch = findViewById(R.id.stroke_switch);
         AppCompatImageButton shapeSwitch = findViewById(R.id.shapes_switch);
         AppCompatImageButton eraserButton = findViewById(R.id.eraser_button);
+        AppCompatImageButton colorButton = findViewById(R.id.color_switch);
 
         LinearLayout shapeButtons = findViewById(R.id.shape_buttons);
         LinearLayout strokeButtons = findViewById(R.id.stroke_buttons);
-
+        LinearLayout colorButtons = findViewById(R.id.color_buttons);
 
         @Override
         public void onClick(View v) {
-            if (v == strokeSwitch){
-                drawShapeView.setPaintColor(Color.BLACK);
+            if (v == strokeSwitch) {
+                if (drawShapeView.getPaintColor() == Color.WHITE) {
+                    drawShapeView.setPaintColor(Color.BLACK);
+                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                }
                 drawShapeView.setEraser(false);
                 int visible = strokeButtons.getVisibility();
-                if (visible == View.GONE){
+                if (visible == View.GONE) {
                     strokeButtons.setVisibility(View.VISIBLE);
                     shapeButtons.setVisibility(View.GONE);
-                }
-                else {
+                    colorButtons.setVisibility(View.GONE);
+                } else {
                     strokeButtons.setVisibility(View.GONE);
                 }
-            }
-            else if (v == shapeSwitch){
-                drawShapeView.setPaintColor(Color.BLACK);
+            } else if (v == shapeSwitch) {
+                if (drawShapeView.getPaintColor() == Color.WHITE) {
+                    drawShapeView.setPaintColor(Color.BLACK);
+                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                }
                 drawShapeView.setEraser(false);
                 int visible = shapeButtons.getVisibility();
-                if (visible == View.GONE){
+                if (visible == View.GONE) {
                     shapeButtons.setVisibility(View.VISIBLE);
                     strokeButtons.setVisibility(View.GONE);
-                }
-                else {
+                    colorButtons.setVisibility(View.GONE);
+                } else {
                     shapeButtons.setVisibility(View.GONE);
                 }
-            }
-            else if (v == eraserButton) {
+            } else if (v == eraserButton) {
                 drawShapeView.eraserOn();
                 strokeButtons.setVisibility(View.GONE);
                 shapeButtons.setVisibility(View.GONE);
+            } else if (v == colorButton) {
+                if (drawShapeView.getPaintColor() == Color.WHITE) {
+                    drawShapeView.setPaintColor(Color.BLACK);
+                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                }
+                drawShapeView.setEraser(false);
+                int visible = colorButtons.getVisibility();
+                if (visible == View.GONE) {
+                    colorButtons.setVisibility(View.VISIBLE);
+                    strokeButtons.setVisibility(View.GONE);
+                    shapeButtons.setVisibility(View.GONE);
+                } else {
+                    colorButtons.setVisibility(View.GONE);
+                }
             }
         }
     }
@@ -372,16 +426,32 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
 
         @Override
         public void onClick(View v) {
-            if (v == strokeSmall){
+            if (v == strokeSmall) {
                 drawShapeView.setPaintStrokeWidth(5f);
             } else if (v == strokeDefault) {
                 drawShapeView.setPaintStrokeWidth(10f);
             } else if (v == strokeNormal) {
-                drawShapeView.setPaintStrokeWidth(15f);
-            } else if (v == strokeBig) {
                 drawShapeView.setPaintStrokeWidth(20f);
+            } else if (v == strokeBig) {
+                drawShapeView.setPaintStrokeWidth(40f);
             }
         }
     }
-}
 
+    private class ColorOnClickListener implements View.OnClickListener {
+        AppCompatImageButton colorBlack = findViewById(R.id.black_color_button);
+        AppCompatImageButton colorRed = findViewById(R.id.red_color_button);
+        AppCompatImageButton colorGreen = findViewById(R.id.green_color_button);
+        AppCompatImageButton colorBlue = findViewById(R.id.blue_color_button);
+        AppCompatImageButton colorYellow = findViewById(R.id.yellow_color_button);
+
+        @Override
+        public void onClick(View v) {
+            if (v == colorBlack) drawShapeView.setPaintColor(Color.BLACK);
+            else if (v == colorRed) drawShapeView.setPaintColor(Color.RED);
+            else if (v == colorGreen) drawShapeView.setPaintColor(Color.GREEN);
+            else if (v == colorBlue) drawShapeView.setPaintColor(Color.BLUE);
+            else if (v == colorYellow) drawShapeView.setPaintColor(Color.YELLOW);
+        }
+    }
+}
