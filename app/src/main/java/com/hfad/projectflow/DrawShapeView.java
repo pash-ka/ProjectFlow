@@ -47,7 +47,7 @@ import java.util.concurrent.Executors;
 * add tabs for each drawing? or some other functionality to switch between them +
 * !!! problems with matrix transformation when switching between drawings via drawer, coordinates are going crazy!!!  ++
 * maybe change the saving to gallery functionality
-* !!! eraser doesn't work right, off with the bitmap or modes or smth
+* !!! eraser doesn't work right, off with the bitmap or modes or smth  ++
 * ?? why use oldcontenbitmap, why not override current bitmap?? +
 */
 /*
@@ -69,12 +69,13 @@ public class DrawShapeView extends View {
     private final Path previewPath;
 
     private Bitmap bitmap;
-    private Bitmap oldContentBitmap;
 
     private final Matrix matrix;
     private final Matrix inverseMatrix;
 
-    private float startX, startY, currentX, currentY;
+    private float startX;
+    private float startY;
+
     private ShapeType shapeType;
 
     private final ScaleGestureDetector scaleGestureDetector;
@@ -84,6 +85,7 @@ public class DrawShapeView extends View {
     public boolean grid = true;
     public boolean hand = false;
     private boolean eraser = false;
+
     private int projectId;
     private int drawingId;
 
@@ -94,6 +96,7 @@ public class DrawShapeView extends View {
     private float maxX = Float.MIN_VALUE;
     private float minY = Float.MAX_VALUE;
     private float maxY = Float.MIN_VALUE;
+
     private float oldMinX = 0, oldMinY = toolbarOffset;
 
     private final WhiteBoardActivity activity;
@@ -155,7 +158,6 @@ public class DrawShapeView extends View {
             path = new Path();
         }
     }
-
 
     @Override
     protected void onAttachedToWindow() {
@@ -240,8 +242,8 @@ public class DrawShapeView extends View {
         float[] touchPoint = { event.getX(), event.getY() };
         matrix.invert(inverseMatrix);
         inverseMatrix.mapPoints(touchPoint);
-        currentX = touchPoint[0];
-        currentY = touchPoint[1];
+        float currentX = touchPoint[0];
+        float currentY = touchPoint[1];
 
         if (shapeType != ShapeType.NONE && !hand){
             switch (event.getAction()) {
@@ -278,28 +280,35 @@ public class DrawShapeView extends View {
 
                         previewPath.addRect(left, top, right, bottom, Path.Direction.CW);
                     }
+                    else if (shapeType == ShapeType.ROUNDED_RECT){
+                        previewPath.reset();
+                        float left = Math.min(startX, currentX);
+                        float right = Math.max(startX, currentX);
+                        float top = Math.min(startY, currentY);
+                        float bottom = Math.max(startY, currentY);
+
+                        previewPath.addRoundRect(left, top, right, bottom, 20, 20, Path.Direction.CW);
+                    }
                     else if (shapeType == ShapeType.CIRCLE) {
                         previewPath.reset();
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         previewPath.addCircle(startX, startY, radius, Path.Direction.CW);
-
-
                     }
                     else if (shapeType == ShapeType.DIAMOND) {
                         previewPath.reset();
                         float leftX = startX;
                         float leftY = (startY + currentY)/2;
-                        float rightX = currentX;
                         float rightY = (startY + currentY)/2;
                         float topX = (startX + currentX)/2;
                         float topY = startY;
                         float bottomX = (startX + currentX)/2;
-                        float bottomY = currentY;
                         previewPath.moveTo(leftX, leftY);
                         previewPath.lineTo(topX, topY);
-                        previewPath.lineTo(rightX, rightY);
-                        previewPath.lineTo(bottomX, bottomY);
+                        previewPath.lineTo(currentX, rightY);
+                        previewPath.lineTo(bottomX, currentY);
                         previewPath.close();
+                    } else if (shapeType == ShapeType.ARROW) {
+                        // TODO: implement arrow drawing
                     }
                     break;
                 case MotionEvent.ACTION_UP:
@@ -318,6 +327,13 @@ public class DrawShapeView extends View {
                         float bottom = Math.max(startY, currentY);
                         path.addRect(left, top, right, bottom, Path.Direction.CW);
                     }
+                    else if (shapeType == ShapeType.ROUNDED_RECT) {
+                        float left = Math.min(startX, currentX);
+                        float right = Math.max(startX, currentX);
+                        float top = Math.min(startY, currentY);
+                        float bottom = Math.max(startY, currentY);
+                        path.addRoundRect(left, top, right, bottom, 20, 20, Path.Direction.CW);
+                    }
                     else if (shapeType == ShapeType.CIRCLE) {
                         float radius = (float) Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
                         path.addCircle(startX, startY, radius, Path.Direction.CW);
@@ -327,17 +343,15 @@ public class DrawShapeView extends View {
                     else if (shapeType == ShapeType.DIAMOND) {
                         float leftX = startX;
                         float leftY = (startY + currentY)/2;
-                        float rightX = currentX;
                         float rightY = (startY + currentY)/2;
                         float topX = (startX + currentX)/2;
                         float topY = startY;
                         float bottomX = (startX + currentX)/2;
-                        float bottomY = currentY;
 
                         path.moveTo(leftX, leftY);
                         path.lineTo(topX, topY);
-                        path.lineTo(rightX, rightY);
-                        path.lineTo(bottomX, bottomY);
+                        path.lineTo(currentX, rightY);
+                        path.lineTo(bottomX, currentY);
                         path.close();
                     }
                     previewPath.reset();
@@ -392,6 +406,7 @@ public class DrawShapeView extends View {
 
     public void eraserOn(){
         setEraser(true);
+        setShapeType(ShapeType.NONE);
         setPaintStrokeWidth(80f);
         paint.setColor(Color.WHITE);
     }
@@ -400,7 +415,9 @@ public class DrawShapeView extends View {
         this.eraser = er;
     }
 
-
+    public boolean getEraser(){
+        return this.eraser;
+    }
 
     public void setPaintStrokeWidth(float width) {
         resetBitmap();
@@ -416,7 +433,6 @@ public class DrawShapeView extends View {
             path.reset();
         }
     }
-
 
     public void clearCanvas() {
         if (bitmap != null && !bitmap.isRecycled()) {
@@ -438,8 +454,7 @@ public class DrawShapeView extends View {
         invalidate();
     }
 
-
-    // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom
+    // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom  ++
     public void saveDrawingToStorage() {
         // Get the bitmap from the view
         Bitmap drawingBitmap = getBitmapFromView(this, false);
@@ -584,7 +599,7 @@ public class DrawShapeView extends View {
     }
 
     private void updateBounds(float x, float y) {
-        int offset = 20;
+        int offset = 50;
 
         if (x < minX) minX = x - offset;
 

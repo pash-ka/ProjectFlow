@@ -189,43 +189,51 @@
             android:id="@+id/shape_buttons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:layout_above="@+id/switch_buttons"
             android:layout_centerHorizontal="true"
             android:orientation="horizontal"
             android:visibility="gone">
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/brush_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/baseline_brush_24" />
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/rect_button"
-                android:layout_width="90dp"
-                android:layout_height="70dp"
+                android:layout_width="70dp"
+                android:layout_height="50dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/baseline_crop_square_24" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/circle_button"
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/rounded_rect_button"
                 android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_height="50dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/outline_circle_24" />
+                android:background="@drawable/rounded_corner_stroke" />
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/circle_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/circle_shape" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/diamond_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/diamond_shape" />
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/line_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="50dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/line_shape" />
 

@@ -25,7 +25,7 @@ navigation view that defines the drawer as its second
 
 /*TODO
 * pencils/brushes +
-* shapes
+* shapes  +
 * grid on/off +
 * place it all somewhere nice, menu +
 * infinite canvas +
@@ -43,7 +43,7 @@ navigation view that defines the drawer as its second
 
 /*
 * need separate paint for every stroke width? or each shape? no, solved +++
-* maybe rewrite the onClicklistener for shapes just like for strokes
+* maybe rewrite the onClicklistener for shapes just like for strokes  +++
 */
 
 
@@ -130,7 +130,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
 
         drawShapeView.setProjectId(projectId);
 
-        Button brushButton = findViewById(R.id.brush_button);
+        /*Button brushButton = findViewById(R.id.brush_button);
         brushButton.setOnClickListener(view -> {
             drawShapeView.setShapeType(ShapeType.NONE);
             drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
@@ -158,7 +158,7 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
         diamondButton.setOnClickListener(v -> {
             drawShapeView.setShapeType(ShapeType.DIAMOND);
             drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
-        });
+        });*/
 
         ToggleButton gridTB = findViewById(R.id.grid_toggle);
         gridTB.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -179,6 +179,16 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
                 // Cast to Button and set OnClickListener
                 AppCompatImageButton button = (AppCompatImageButton) child;
                 button.setOnClickListener(new StrokeOnClickListener());
+            }
+        }
+        LinearLayout shape_buttons = findViewById(R.id.shape_buttons);
+        for (int i = 0; i < shape_buttons.getChildCount(); i++) {
+            View child = shape_buttons.getChildAt(i);
+            // Check if the child is a Button
+            if (child instanceof AppCompatImageButton) {
+                // Cast to Button and set OnClickListener
+                AppCompatImageButton button = (AppCompatImageButton) child;
+                button.setOnClickListener(new ShapeOnClickListener());
             }
         }
 
@@ -368,9 +378,12 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             if (v == strokeSwitch) {
                 if (drawShapeView.getPaintColor() == Color.WHITE) {
                     drawShapeView.setPaintColor(Color.BLACK);
-                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                    if (drawShapeView.getEraser()) {
+                        drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                        drawShapeView.setEraser(false);
+                    }
                 }
-                drawShapeView.setEraser(false);
+
                 int visible = strokeButtons.getVisibility();
                 if (visible == View.GONE) {
                     strokeButtons.setVisibility(View.VISIBLE);
@@ -382,9 +395,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             } else if (v == shapeSwitch) {
                 if (drawShapeView.getPaintColor() == Color.WHITE) {
                     drawShapeView.setPaintColor(Color.BLACK);
-                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                    if (drawShapeView.getEraser()) {
+                        drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                        drawShapeView.setEraser(false);
+                    }
                 }
-                drawShapeView.setEraser(false);
                 int visible = shapeButtons.getVisibility();
                 if (visible == View.GONE) {
                     shapeButtons.setVisibility(View.VISIBLE);
@@ -400,9 +415,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             } else if (v == colorButton) {
                 if (drawShapeView.getPaintColor() == Color.WHITE) {
                     drawShapeView.setPaintColor(Color.BLACK);
-                    drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                    if (drawShapeView.getEraser()) {
+                        drawShapeView.setPaintStrokeWidth(drawShapeView.lastStrokeWidth);
+                        drawShapeView.setEraser(false);
+                    }
                 }
-                drawShapeView.setEraser(false);
                 int visible = colorButtons.getVisibility();
                 if (visible == View.GONE) {
                     colorButtons.setVisibility(View.VISIBLE);
@@ -452,6 +469,33 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
             else if (v == colorGreen) drawShapeView.setPaintColor(Color.GREEN);
             else if (v == colorBlue) drawShapeView.setPaintColor(Color.BLUE);
             else if (v == colorYellow) drawShapeView.setPaintColor(Color.YELLOW);
+        }
+    }
+
+    private class ShapeOnClickListener implements View.OnClickListener{
+        AppCompatImageButton brushButton = findViewById(R.id.brush_button);
+        AppCompatImageButton rectButton = findViewById(R.id.rect_button);
+        AppCompatImageButton roundedRectButton = findViewById(R.id.rounded_rect_button);
+        AppCompatImageButton circleButton = findViewById(R.id.circle_button);
+        AppCompatImageButton lineButton = findViewById(R.id.line_button);
+        AppCompatImageButton diamondButton = findViewById(R.id.diamond_button);
+
+
+        @Override
+        public void onClick(View v) {
+            if (v == brushButton) {
+                drawShapeView.setShapeType(ShapeType.NONE);
+            } else if (v == rectButton) {
+                drawShapeView.setShapeType(ShapeType.RECTANGLE);
+            } else if (v == circleButton) {
+                drawShapeView.setShapeType(ShapeType.CIRCLE);
+            } else if (v == lineButton) {
+                drawShapeView.setShapeType(ShapeType.LINE);
+            } else if (v == diamondButton) {
+                drawShapeView.setShapeType(ShapeType.DIAMOND);
+            } else if (v == roundedRectButton) {
+                drawShapeView.setShapeType(ShapeType.ROUNDED_RECT);
+            }
         }
     }
 }
