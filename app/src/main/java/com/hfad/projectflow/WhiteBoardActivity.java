@@ -47,6 +47,7 @@ navigation view that defines the drawer as its second
 */
 
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -252,9 +253,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        ArrayList<ArrayList<float[]>> points = convertPathToContours(drawShapeView.getPath());
+        //ArrayList<ArrayList<float[]>> points = convertPathToContours(drawShapeView.getPath());
+        Bitmap bitmap = drawShapeView.getBitmap();
         //System.out.println(points);
-        outState.putSerializable("mainPathPoints", points);
+        //outState.putSerializable("mainPathPoints", points);
+        outState.putParcelable("bitmap", bitmap);
         super.onSaveInstanceState(outState);
     }
 
@@ -262,11 +265,11 @@ public class WhiteBoardActivity extends AppCompatActivity implements NavDrawerAd
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        ArrayList<ArrayList<float[]>> mainPathPoints = (ArrayList<ArrayList<float[]>>) savedInstanceState.getSerializable("mainPathPoints");
+        //ArrayList<ArrayList<float[]>> mainPathPoints = (ArrayList<ArrayList<float[]>>) savedInstanceState.getSerializable("mainPathPoints");
 
         // Recreate the paths from the stored points
-        drawShapeView.setPath(convertContoursToPath(Objects.requireNonNull(mainPathPoints)));
-
+        //drawShapeView.setPath(convertContoursToPath(Objects.requireNonNull(mainPathPoints)));
+        drawShapeView.setBitmap(savedInstanceState.getParcelable("bitmap"));
     }
 
     private ArrayList<ArrayList<float[]>> convertPathToContours(Path path) {

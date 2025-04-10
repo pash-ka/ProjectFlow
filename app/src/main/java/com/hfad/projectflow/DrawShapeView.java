@@ -457,31 +457,32 @@ public class DrawShapeView extends View {
     // need to squeeze canvas so that it fits all the drawings ow at least for regular size zoom  ++
     public void saveDrawingToStorage() {
         // Get the bitmap from the view
-        Bitmap drawingBitmap = getBitmapFromView(this, false);
-
-        // Save the bitmap to external storage
-        try {
-            byte[] drawingData = convertBitmapToByteArray(drawingBitmap);
-            // Insert into database
-            if (newDrawing){
-                Drawing drawing = new Drawing();
-                drawingId = drawing.id;
-                drawing.projectId = projectId;
-                drawing.drawingData = drawingData;
-                new Thread(() -> db.drawingDao().insertDrawing(drawing)).start();
-                System.out.println("Drawing saved to database");
-            }
-            else {
-                new Thread(()-> {
-                    Drawing drawing = db.drawingDao().getDrawingById(drawingId);
+        if (bitmap != null || !path.isEmpty()){
+            Bitmap drawingBitmap = getBitmapFromView(this, false);
+            // Save the bitmap to external storage
+            try {
+                byte[] drawingData = convertBitmapToByteArray(drawingBitmap);
+                // Insert into database
+                if (newDrawing){
+                    Drawing drawing = new Drawing();
+                    drawingId = drawing.id;
+                    drawing.projectId = projectId;
                     drawing.drawingData = drawingData;
-                    db.drawingDao().updateDrawing(drawing);
-                    activity.runOnUiThread(() -> System.out.println("Drawing updated"));
-                }).start();
-            }
+                    new Thread(() -> db.drawingDao().insertDrawing(drawing)).start();
+                    System.out.println("Drawing saved to database");
+                }
+                else {
+                    new Thread(()-> {
+                        Drawing drawing = db.drawingDao().getDrawingById(drawingId);
+                        drawing.drawingData = drawingData;
+                        db.drawingDao().updateDrawing(drawing);
+                        activity.runOnUiThread(() -> System.out.println("Drawing updated"));
+                    }).start();
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -594,8 +595,14 @@ public class DrawShapeView extends View {
     }
 
     public void setBitmap(Bitmap bitmap){
-        this.bitmap = bitmap;
-        setBoundsForLoadedBitmap(bitmap);
+        if (bitmap != null){
+            this.bitmap = bitmap;
+            setBoundsForLoadedBitmap(bitmap);
+        }
+    }
+
+    public Bitmap getBitmap(){
+        return bitmap;
     }
 
     private void updateBounds(float x, float y) {

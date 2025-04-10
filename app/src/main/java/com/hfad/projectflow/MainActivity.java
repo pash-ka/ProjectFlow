@@ -36,6 +36,9 @@ This means that when the user clicks on the Up button in
 SomeOtherActivity’s app bar, MainActivity will be
 displayed
 Project names should be unique +
+
+?? maybe get rid of WorkActivity..  or maybe don't use activities for each part of it?
+use fragments and just show the respectful one on click  ?
 */
 
 public class MainActivity extends AppCompatActivity implements ProjectList.Listener{

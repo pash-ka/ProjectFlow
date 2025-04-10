@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.hfad.projectflow.database.AppDatabase;
 import com.hfad.projectflow.database.DatabaseSingleton;
@@ -110,28 +111,33 @@ public class ProjectList extends ListFragment{
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                new AlertDialog.Builder(getContext())
-                        .setTitle("Delete Item")
-                        .setMessage("Are you sure you want to delete this item?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Project project = projectList.get(position);
-                                names.remove(position);
-                                arrayAdapter.notifyDataSetChanged();
-                                Executors.newSingleThreadExecutor().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        AppDatabase db = DatabaseSingleton.getInstance(getActivity().getApplicationContext());
-                                        ProjectDao projectDao = db.projectDao();
-                                        projectDao.deleteProject(project);
-                                    }
-                                });
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null)
-                        .show();
+                new DeleteDialog(requireContext(), position);
                 return true;
             }
         });
+    }
+
+    private class DeleteDialog extends AlertDialog.Builder{
+
+        public DeleteDialog(@NonNull Context context, int position) {
+            super(context);
+            setTitle("Choose Action");
+            setMessage("You can delete the project");
+            setPositiveButton("Delete", (dialog, which) -> {
+                Project project = projectList.get(position);
+                names.remove(position);
+                arrayAdapter.notifyDataSetChanged();
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    AppDatabase db = DatabaseSingleton.getInstance(requireActivity().getApplicationContext());
+                    ProjectDao projectDao = db.projectDao();
+                    projectDao.deleteProject(project);
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(context, "Project Deleted", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            });
+            setNegativeButton(android.R.string.no, null);
+            show();
+        }
     }
 }
