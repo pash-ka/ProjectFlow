@@ -53,7 +53,7 @@ public class WorkActivity extends AppCompatActivity {
         docView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Opening documentation", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(v.getContext(), "Opening documentation", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(WorkActivity.this, DocumentationActivity.class);
 

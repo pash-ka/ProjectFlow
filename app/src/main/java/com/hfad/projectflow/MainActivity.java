@@ -22,19 +22,18 @@ import com.hfad.projectflow.database.UserDao;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-
 /* 4 work parts:
-    Documentation ? Project Details
-    BlockSchemes ? WhiteBoard
+    Documentation ? Project Details  +
+    BlockSchemes ? WhiteBoard  ++
     To do list ? task management with scheduling
     Dashboard / Overview
 */
 /*
 Update AndroidManifest.xml to specify that
-MainActivity is the parent of SomeOtherActivity.
+MainActivity is the parent of SomeOtherActivity. +
 This means that when the user clicks on the Up button in
 SomeOtherActivity’s app bar, MainActivity will be
-displayed
+displayed ++
 Project names should be unique +
 */
 
