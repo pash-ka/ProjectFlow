@@ -1,46 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/white"
     android:columnCount="2"
-    android:padding="8dp"
     android:rowCount="2"
     android:theme="@style/ThemeOverlay.AppCompat.Light"
     android:orientation="vertical"
     tools:context=".WorkActivity">
 
-    <TextView
-        android:id="@+id/documentation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:background="@drawable/rounded_corner_solid"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp"
-        android:gravity="center"
-        android:text="@string/documentation"
-        android:textColor="@color/roundedCornerText"
-        android:textSize="25sp"
-        />
 
-    <TextView
-        android:id="@+id/whiteboard"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:background="@drawable/rounded_corner_solid"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp"
-        android:gravity="center"
-        android:text="@string/whiteboard"
-        android:textColor="@color/roundedCornerText"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        >
+        <include
+            layout="@layout/toolbar"
+            android:id="@+id/toolbar"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            app:tabIndicatorColor="@color/colorPrimaryDark"
+            app:tabSelectedTextColor="@color/colorPrimaryDark"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         />
 
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

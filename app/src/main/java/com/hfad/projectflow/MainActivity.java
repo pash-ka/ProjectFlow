@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -36,6 +37,7 @@ SomeOtherActivity’s app bar, MainActivity will be
 displayed ++
 Project names should be unique +
 */
+// ! renaming projects
 
 public class MainActivity extends AppCompatActivity implements ProjectList.Listener{
 
@@ -50,10 +52,12 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
 
         Fragment plFragment = new ProjectList();
 
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.content_frame, plFragment);
         ft.commit();
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         db = DatabaseSingleton.getInstance(getApplicationContext());
 

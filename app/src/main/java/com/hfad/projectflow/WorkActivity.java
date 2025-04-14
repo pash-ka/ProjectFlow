@@ -3,14 +3,25 @@ package com.hfad.projectflow;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
+import java.io.IOException;
 import java.util.Objects;
 
 
@@ -18,17 +29,15 @@ public class WorkActivity extends AppCompatActivity {
 
     public static final String EXTRA_PROJECT_ID = "id";
     public static final String EXTRA_CURRENT_USER_ID = "userId";
-    int projectId;
-    int currentUserId;
+    private int projectId;
+    private int currentUserId;
+
+    private ViewPager2 pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
-
-        ActionBar actionBar = getSupportActionBar();
-        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
-
 
         Intent intent = getIntent();
         if (intent.getExtras() != null) {
@@ -42,38 +51,34 @@ public class WorkActivity extends AppCompatActivity {
             currentUserId = preferences.getInt("currentUserId", 1);
             System.out.println(projectId + " : " + currentUserId);
         }
-        /*
-        projectId = (int) getIntent().getExtras().get(EXTRA_PROJECT_ID);
-        currentUserId = (int) getIntent().getExtras().get(EXTRA_CURRENT_USER_ID);
-        */
 
-        // if change to tab -> need to have fragments, not activities!!
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        TextView docView = findViewById(R.id.documentation);
-        docView.setOnClickListener(new View.OnClickListener() {
+        //Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
+
+        WorkSectionsPagerAdapter pagerAdapter = new WorkSectionsPagerAdapter(this, currentUserId, projectId);
+        pager = findViewById(R.id.pager);
+        pager.setUserInputEnabled(false);
+        pager.setAdapter(pagerAdapter);
+        TabLayout tabLayout = findViewById(R.id.tabs);
+        //tabLayout.setupWithViewPager(pager);
+        new TabLayoutMediator(tabLayout, pager, (tab, position) -> {
+            tab.setText(pagerAdapter.getPageTitle(position));
+        }).attach();
+
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onClick(View v) {
-                //Toast.makeText(v.getContext(), "Opening documentation", Toast.LENGTH_SHORT).show();
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
 
-                Intent intent = new Intent(WorkActivity.this, DocumentationActivity.class);
+                if (position != 1) {
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + 1);
+                    if (fragment instanceof WhiteBoardFragment){
+                        ((WhiteBoardFragment) fragment).getDrawerLayout().closeDrawer(GravityCompat.START);
+                    }
+                }
 
-                intent.putExtra(DocumentationActivity.EXTRA_PROJECT_ID, projectId);
-                intent.putExtra(DocumentationActivity.EXTRA_CURRENT_USER_ID, currentUserId);
-                //System.out.println(currentUserId);
-                startActivity(intent);
-            }
-        });
-
-        TextView whiteBoardView = findViewById(R.id.whiteboard);
-        whiteBoardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(WorkActivity.this, WhiteBoardActivity.class);
-
-                intent.putExtra(WhiteBoardActivity.EXTRA_PROJECT_ID, projectId);
-                intent.putExtra(WhiteBoardActivity.EXTRA_CURRENT_USER_ID, currentUserId);
-
-                startActivity(intent);
             }
         });
     }
@@ -88,7 +93,43 @@ public class WorkActivity extends AppCompatActivity {
         editor.putInt("projectId", projectId);
         editor.putInt("currentUserId", currentUserId);
 
-        editor.apply(); // Apply changes
+        // Apply changes
+        editor.apply();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_whiteboard, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int currentPosition = pager.getCurrentItem();
+        Fragment currentFragment = getSupportFragmentManager().findFragmentByTag("f" + currentPosition);
+
+        if (currentFragment == getSupportFragmentManager().findFragmentByTag("f" + 1) && currentFragment != null) {
+
+            DrawShapeView drawShapeView = currentFragment.requireView().findViewById(R.id.draw_shape_view);
+            if (item.getItemId() == R.id.action_save_image) {
+
+                try {
+                    drawShapeView.saveImageToExternalStorage();
+                    Toast.makeText(getApplicationContext(), "Image saved", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return true;
+            } else if (item.getItemId() == R.id.action_new_image) {
+                drawShapeView.saveDrawingToStorage();
+                drawShapeView.newDrawing = true;
+                drawShapeView.clearCanvas();
+                drawShapeView.resetBounds();
+                return true;
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

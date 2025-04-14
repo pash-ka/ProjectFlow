@@ -11,15 +11,20 @@ import com.hfad.projectflow.database.DrawingDao;
 import java.util.List;
 
 public class WhiteBoardViewModel extends ViewModel {
-    private final LiveData<List<Drawing>> drawingData;
+    private LiveData<List<Drawing>> drawingData;
 
-    public WhiteBoardViewModel(DrawingDao drawingDao, int projectId, WhiteBoardActivity activity) {
+    public WhiteBoardViewModel(DrawingDao drawingDao, int projectId, WhiteBoardFragment fragment) {
         // Fetch LiveData from DAO
+        observeData(drawingDao, projectId, fragment);
+
+    }
+
+    public void observeData(DrawingDao drawingDao, int projectId, WhiteBoardFragment fragment){
         drawingData = drawingDao.getDrawingsForProjectLive(projectId);
-        drawingData.observe(activity, drawingDataList -> {
+        drawingData.observe(fragment, drawingDataList -> {
             if (drawingDataList != null && !drawingDataList.isEmpty()) {
                 // Update the adapter with new data
-                activity.getNavDrawerAdapter().updateData(drawingDataList);
+                fragment.getNavDrawerAdapter().updateData(drawingDataList);
                 System.out.println("List size: " + drawingDataList.size());
             } else {
                 System.out.println("No drawing data found for project_id: " + projectId);

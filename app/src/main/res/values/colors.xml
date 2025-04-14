@@ -9,4 +9,6 @@
     <color name="roundedCornerBackground">#FFF</color>
     <color name="roundedCornerText">#000</color>
 
+    <color name="colorTabBackground">#BAC2D1</color>
+
 </resources>
