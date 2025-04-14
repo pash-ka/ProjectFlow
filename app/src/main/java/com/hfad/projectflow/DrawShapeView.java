@@ -89,7 +89,6 @@ public class DrawShapeView extends View {
     private int projectId;
     private int drawingId;
 
-    private final int toolbarOffset = 128;
     public boolean newDrawing = false;
 
     private float minX = Float.MAX_VALUE;
@@ -97,9 +96,9 @@ public class DrawShapeView extends View {
     private float minY = Float.MAX_VALUE;
     private float maxY = Float.MIN_VALUE;
 
-    private float oldMinX = 0, oldMinY = toolbarOffset;
+    private float oldMinX = 0, oldMinY = 0;
 
-    private final WhiteBoardActivity activity;
+    private final WorkActivity activity;
 
     private final AppDatabase db;
 
@@ -126,8 +125,8 @@ public class DrawShapeView extends View {
     public DrawShapeView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setBackgroundColor(Color.WHITE);
-        if (context instanceof WhiteBoardActivity) {
-            activity = (WhiteBoardActivity) context;
+        if (context instanceof WorkActivity) {
+            activity = (WorkActivity) context;
         } else {
             throw new IllegalArgumentException("Context must be an instance of Activity");
         }
@@ -159,9 +158,17 @@ public class DrawShapeView extends View {
         }
     }
 
+
+
     @Override
     protected void onAttachedToWindow() {
 
+        resetView();
+
+        super.onAttachedToWindow();
+    }
+
+    public void resetView(){
         DrawingDao drawingDao = db.drawingDao();
         Executors.newSingleThreadExecutor().execute(() -> {
             List<Drawing> drawings = drawingDao.getDrawingsForProject(projectId);
@@ -183,8 +190,6 @@ public class DrawShapeView extends View {
                 activity.runOnUiThread(() -> newDrawing = true);
             }
         });
-
-        super.onAttachedToWindow();
     }
 
     @Override
@@ -470,6 +475,7 @@ public class DrawShapeView extends View {
                     drawing.drawingData = drawingData;
                     new Thread(() -> db.drawingDao().insertDrawing(drawing)).start();
                     System.out.println("Drawing saved to database");
+                    newDrawing = false;
                 }
                 else {
                     new Thread(()-> {
@@ -484,6 +490,9 @@ public class DrawShapeView extends View {
                 e.printStackTrace();
             }
         }
+
+
+
     }
 
     private Bitmap getBitmapFromView(View view, boolean reset) {
@@ -552,29 +561,33 @@ public class DrawShapeView extends View {
     }
 
     public void saveImageToExternalStorage() throws IOException {
-        Bitmap bitmap = getBitmapFromView(this, false);
 
-        System.out.println("saveImageToExternalStorage()");
-        // Get the current time for the file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        Log.d("Saving file: ", imageFileName);
+        if (bitmap != null || !path.isEmpty()){
+            Bitmap bitmap = getBitmapFromView(this, false);
 
-        // Check if the device is running Android Q or higher
+            System.out.println("saveImageToExternalStorage()");
+            // Get the current time for the file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            Log.d("Saving file: ", imageFileName);
 
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName);
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+            // Check if the device is running Android Q or higher
 
-        Uri uri = activity.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        if (uri != null) {
-            try (OutputStream outputStream = activity.getContentResolver().openOutputStream(uri)) {
-                assert outputStream != null;
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+            Uri uri = activity.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri != null) {
+                try (OutputStream outputStream = activity.getContentResolver().openOutputStream(uri)) {
+                    assert outputStream != null;
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                }
             }
+            panCanvas(minX, minY);
         }
-        panCanvas(minX, minY);
+
     }
 
     public void setProjectId(int projectId){
@@ -591,7 +604,7 @@ public class DrawShapeView extends View {
     }
 
     public void setPath(Path path){
-        this.path = path;
+        this.path.set(path);
     }
 
     public void setBitmap(Bitmap bitmap){
@@ -626,9 +639,9 @@ public class DrawShapeView extends View {
 
     private void setBoundsForLoadedBitmap(Bitmap bitmap){
         minX = 0;
-        minY = toolbarOffset;
+        minY = 0;
         maxX = bitmap.getWidth();
-        maxY = bitmap.getHeight()+toolbarOffset;
+        maxY = bitmap.getHeight();
     }
 }
 

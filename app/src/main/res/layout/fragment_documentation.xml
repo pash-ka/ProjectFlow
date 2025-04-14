@@ -6,15 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".DocumentationActivity"
-    >
+    android:background="@color/white"
 
+    >
 
     <TextView
         android:id="@+id/projectName"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:textSize="25sp"
+        android:textSize="28sp"
+        android:textColor="@color/colorPrimaryDark"
         android:layout_margin="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,6 +26,7 @@
         android:id="@+id/doc_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="10dp"
         android:gravity="top"
         app:layout_constraintHeight_percent="0.95"
 

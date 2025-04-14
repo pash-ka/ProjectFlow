@@ -11,19 +11,19 @@ import com.hfad.projectflow.database.DrawingDao;
 public class WhiteBoardViewModelFactory implements ViewModelProvider.Factory {
     private final DrawingDao drawingDao;
     private final int projectId;
-    private final WhiteBoardActivity activity;
+    private final WhiteBoardFragment fragment;
 
-    public WhiteBoardViewModelFactory(DrawingDao drawingDao, int projectId, WhiteBoardActivity activity) {
+    public WhiteBoardViewModelFactory(DrawingDao drawingDao, int projectId, WhiteBoardFragment fragment) {
         this.drawingDao = drawingDao;
         this.projectId = projectId;
-        this.activity = activity;
+        this.fragment = fragment;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(WhiteBoardViewModel.class)) {
-            return (T) new WhiteBoardViewModel(drawingDao, projectId, activity);
+            return (T) new WhiteBoardViewModel(drawingDao, projectId, fragment);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }

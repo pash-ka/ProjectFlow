@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -22,24 +23,24 @@ import com.hfad.projectflow.database.UserDao;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-
 /* 4 work parts:
-    Documentation ? Project Details
-    BlockSchemes ? WhiteBoard
+    Documentation ? Project Details  +
+    BlockSchemes ? WhiteBoard  ++
     To do list ? task management with scheduling
     Dashboard / Overview
 */
 /*
 Update AndroidManifest.xml to specify that
-MainActivity is the parent of SomeOtherActivity.
+MainActivity is the parent of SomeOtherActivity. +
 This means that when the user clicks on the Up button in
 SomeOtherActivity’s app bar, MainActivity will be
-displayed
+displayed ++
 Project names should be unique +
 
 ?? maybe get rid of WorkActivity..  or maybe don't use activities for each part of it?
 use fragments and just show the respectful one on click  ?
 */
+// ! renaming projects
 
 public class MainActivity extends AppCompatActivity implements ProjectList.Listener{
 
@@ -54,10 +55,12 @@ public class MainActivity extends AppCompatActivity implements ProjectList.Liste
 
         Fragment plFragment = new ProjectList();
 
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.content_frame, plFragment);
         ft.commit();
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         db = DatabaseSingleton.getInstance(getApplicationContext());
 

@@ -50,7 +50,7 @@ public class CreateProjectActivity extends AppCompatActivity {
 
                 // Create a new project
                 Project project = new Project();
-                project.name = projectName;
+                project.name = projectName.strip();
                 project.description = projectDescription;
                 project.ownerId = (int) getIntent().getExtras().get(CURRENT_USER_ID);
 

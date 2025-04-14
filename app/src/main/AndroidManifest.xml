@@ -12,19 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjectFlow"
         tools:targetApi="31">
-        <activity
-            android:name=".WhiteBoardActivity"
-            android:parentActivityName=".WorkActivity"
-            android:theme="@style/Theme.ProjectFlow.ActionBar.WhiteBoard"
 
-            android:exported="false" />
         <activity
             android:name=".CreateProjectActivity"
             android:exported="false" />
-        <activity
-            android:name=".DocumentationActivity"
-            android:parentActivityName=".WorkActivity"
-            android:exported="false" />
+
         <activity
             android:name=".WorkActivity"
             android:parentActivityName=".MainActivity"
